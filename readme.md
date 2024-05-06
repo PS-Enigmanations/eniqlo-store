@@ -29,3 +29,9 @@ BCRYPT_SALT=8
 ```sh
 make migrateup
 ```
+
+**Setup:**
+
+```sh
+go mod download
+```
