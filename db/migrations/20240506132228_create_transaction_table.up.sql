@@ -1,6 +1,6 @@
 -- Create table transactions
 CREATE TABLE "public"."transactions" (
-    "id" serial NOT NULL,
+    "id" UUID NOT NULL,
     "customer_id" UUID NOT NULL,
     "total" numeric NOT NULL,
     "paid" numeric NOT NULL,
