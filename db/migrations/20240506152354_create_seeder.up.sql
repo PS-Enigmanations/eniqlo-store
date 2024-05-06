@@ -19,3 +19,17 @@ VALUES
 ('c5c0e5c7-62c5-4e6e-8f6d-09cc12345678', 'John Doe', '1234567890', NOW(), NULL, NULL),
 ('2c1b08f9-3c43-42d2-b0f2-b55e98765432', 'Jane Smith', '9876543210', NOW(), NULL, NULL),
 ('6f704b33-eb4b-49b1-af32-0ae655432167', 'Alice Johnson', '5551234567', NOW(), NULL, NULL);
+
+-- TRANSACTION SEEDER
+INSERT INTO "public"."transactions" ("id", "customer_id", "total", "paid", "change", "created_at", "updated_at") 
+VALUES 
+('33e19244-91a0-4e7b-90c8-41bf8e0514e1', 'c5c0e5c7-62c5-4e6e-8f6d-09cc12345678', 150.99, 160.00, 9.01, '2024-05-06 12:00:00', NULL),
+('de9fb3b0-7b98-4c90-bd6b-35b8f75432fc', '2c1b08f9-3c43-42d2-b0f2-b55e98765432', 75.50, 80.00, 4.50, '2024-05-06 12:00:00', NULL),
+('d4d7b6f2-ae92-4ee4-bfa7-f789f0d12345', '6f704b33-eb4b-49b1-af32-0ae655432167', 200.00, 200.00, 0, '2024-05-06 12:00:00', NULL);
+
+-- TRANSACTION DETAIL SEEDER
+INSERT INTO "public"."transaction_details" ("id", "transaction_id", "product_id", "quantity", "total", "created_at", "updated_at") 
+VALUES 
+('7b52009b-8b3c-4dc4-8f11-345bea012345', '33e19244-91a0-4e7b-90c8-41bf8e0514e1', '0f8fad5b-d9cb-469f-a165-70867728950e', 2, 31.98, '2024-05-06 12:00:00', NULL),
+('60e2dece-087b-40ab-a4c9-7865dc987654', 'de9fb3b0-7b98-4c90-bd6b-35b8f75432fc', '7c9e6679-7425-40de-944b-e07fc1f90ae7', 1, 29.99, '2024-05-06 12:00:00', NULL),
+('3f7b709b-41b2-4c5c-ae5f-1f669d012345', 'd4d7b6f2-ae92-4ee4-bfa7-f789f0d12345', '8f14e45fceea167a5a36dedd4bea2543', 3, 149.97, '2024-05-06 12:00:00', NULL);
