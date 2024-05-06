@@ -1,4 +1,4 @@
--- Create table users
+-- Create table customers
 CREATE TABLE "public"."customers" (
     "id" varchar(50) NOT NULL,
     "name" varchar(50) NOT NULL,
