@@ -1,10 +1,10 @@
 -- Create table products
 CREATE TABLE "public"."products" (
-    "id" varchar(50) NOT NULL,
+    "id" UUID NOT NULL,
     "name" varchar(30) NOT NULL,
     "sku" varchar(30) NOT NULL,
     "category" varchar(20) NOT NULL,
-    "image_url" varchar[] NOT NULL,
+    "image_url" varchar(200) NOT NULL,
     "notes" varchar(200) NOT NULL,
     "price" numeric NOT NULL,
     "stock" integer NOT NULL,

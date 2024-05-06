@@ -1,7 +1,7 @@
 -- Create table transaction_details
 CREATE TABLE "public"."transaction_details" (
     "id" serial NOT NULL,
-    "product_id" varchar(50) NOT NULL,
+    "product_id" UUID NOT NULL,
     "quantity" int NOT NULL,
     "total" numeric NOT NULL,
     "created_at" timestamptz NOT NULL DEFAULT now(),
