@@ -1,6 +1,6 @@
 -- Create table users
 CREATE TABLE "public"."users" (
-    "id" varchar(50) NOT NULL,
+    "id" UUID NOT NULL,
     "name" varchar(50) NOT NULL,
     "phone_number" varchar(16) NOT NULL,
     "password" varchar(150) NOT NULL,
