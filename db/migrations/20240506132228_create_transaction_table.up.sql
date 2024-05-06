@@ -1,6 +1,6 @@
 -- Create table transactions
 CREATE TABLE "public"."transactions" (
-    "id" varchar(50) NOT NULL,
+    "id" serial NOT NULL,
     "customer_id" varchar(50) NOT NULL,
     "total" numeric NOT NULL,
     "paid" numeric NOT NULL,
