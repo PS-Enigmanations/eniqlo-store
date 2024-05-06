@@ -1,6 +1,6 @@
 -- Create table customers
 CREATE TABLE "public"."customers" (
-    "id" varchar(50) NOT NULL,
+    "id" UUID NOT NULL,
     "name" varchar(50) NOT NULL,
     "phone_number" varchar(16) NOT NULL,
     "created_at" timestamptz NOT NULL DEFAULT now(),
