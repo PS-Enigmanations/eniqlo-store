@@ -45,4 +45,7 @@ make dev
 
 ### API:
 
+- [x] http://localhost:8080/v1/staff/register
+- [x] http://localhost:8080/v1/staff/login
 - [x] http://localhost:8080/v1/product/customer
+- [x] http://localhost:8080/v1/customer/register
