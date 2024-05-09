@@ -101,7 +101,7 @@ func (db *database) SearchProducts(ctx context.Context, params *request.SearchPr
 				return nil, err
 			}
 
-			// add c to cats slice
+			// add p to products slice
 			products = append(products, p)
 		}
 	}

@@ -7,13 +7,13 @@ import (
 
 // Search response
 type ProductShow struct {
-	Id        int       `json:"id"`
+	Id        string    `json:"id"`
 	Name      string    `json:"name"`
 	Sku       string    `json:"sku"`
 	Category  string    `json:"category"`
 	ImageUrl  string    `json:"imageUrl"`
 	Stock     int       `json:"stock"`
-	Price     int       `json:"price"`
+	Price     float64   `json:"price"`
 	Location  string    `json:"location"`
 	CreatedAt time.Time `json:"created_at"`
 }
