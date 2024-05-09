@@ -28,13 +28,12 @@ func NewStaffService(repo repository.StaffRepository) StaffService {
 
 // Login implements StaffService.
 func (service *staffService) Login(ctx *gin.Context, req request.StaffLoginRequest) (*staff.Staff, error) {
-	hashedPassword, err := bcrypt.HashPassword(req.Password)
+	staff, err := service.repo.FindByPhoneNumber(ctx.Request.Context(), req.PhoneNumber)
 	if err != nil {
 		return nil, err
 	}
-	staff, err := service.repo.Login(ctx.Request.Context(), req.PhoneNumber, hashedPassword)
-	if err != nil {
-		return nil, err
+	if !bcrypt.CheckPasswordHash(req.Password, staff.Password) {
+		return nil, errors.New("invalid password")
 	}
 
 	return staff, nil
