@@ -9,6 +9,7 @@ import (
 
 type CustomerController interface {
 	CustomerRegister(ctx *gin.Context)
+	CustomerGet(ctx *gin.Context)
 }
 
 type customerController struct {
@@ -20,6 +21,11 @@ func NewCustomerController(svc service.CustomerService) CustomerController {
 }
 
 func (c *customerController) CustomerRegister(ctx *gin.Context) {
+	ctx.Status(http.StatusOK)
+	return
+}
+
+func (c *customerController) CustomerGet(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 	return
 }
