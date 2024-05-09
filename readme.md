@@ -47,5 +47,12 @@ make dev
 
 - [x] http://localhost:8080/v1/staff/register
 - [x] http://localhost:8080/v1/staff/login
+- [ ] http://localhost:8080/v1/product (POST)
+- [ ] http://localhost:8080/v1/product (GET)
+- [ ] http://localhost:8080/v1/product/{id} (PUT)
+- [ ] http://localhost:8080/v1/product/{id} (DELETE)
 - [x] http://localhost:8080/v1/product/customer
 - [x] http://localhost:8080/v1/customer/register
+- [ ] http://localhost:8080/v1/customer
+- [ ] http://localhost:8080/v1/product/checkout
+- [ ] http://localhost:8080/v1/product/checkout/history
