@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"enigmanations/eniqlo-store/config"
+	"enigmanations/eniqlo-store/internal/staff/controller"
+	"enigmanations/eniqlo-store/internal/staff/repository"
+	"enigmanations/eniqlo-store/internal/staff/service"
 	"enigmanations/eniqlo-store/pkg/database"
 	"enigmanations/eniqlo-store/pkg/env"
 	"fmt"
@@ -63,7 +66,13 @@ func main() {
 		})
 	})
 
-	router.POST("/v1/staff/register")
+	// Register the staff controller
+	staffRepository := repository.NewStaffRepository(pool)
+	staffService := service.NewStaffService(staffRepository)
+	staffController := controller.NewStaffController(staffService)
+	router.POST("v1/staff/register", func(c *gin.Context) {
+		staffController.Register(c)
+	})
 
 	router.Run(fmt.Sprintf("%s:%d", cfg.AppHost, cfg.AppPort))
 	//router.Run()
