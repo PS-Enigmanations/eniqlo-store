@@ -46,6 +46,10 @@ func (db *database) SearchProducts(ctx context.Context, params *request.SearchPr
 		FROM products p
 	`
 
+	// Request should only show product that have isAvailable == true
+	args = append(args, true)
+	where = append(where, fmt.Sprintf(`"is_available" = $%d`, len(args)))
+
 	// Name
 	if params.Name != "" {
 		args = append(args, params.Name)
