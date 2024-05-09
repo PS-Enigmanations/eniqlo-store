@@ -14,8 +14,8 @@ import (
 )
 
 type CustomerController interface {
-	CustomerRegisterController(ctx *gin.Context)
-	CustomerGet(ctx *gin.Context)
+	Register(ctx *gin.Context)
+	SearchCustomer(ctx *gin.Context)
 }
 
 type customerController struct {
@@ -26,7 +26,7 @@ func NewCustomerController(svc service.CustomerService) CustomerController {
 	return &customerController{Service: svc}
 }
 
-func (c *customerController) CustomerRegisterController(ctx *gin.Context) {
+func (c *customerController) Register(ctx *gin.Context) {
 	var reqBody request.CustomerRegisterRequest
 
 	if err := ctx.ShouldBindJSON(&reqBody); err != nil {
@@ -64,7 +64,24 @@ func (c *customerController) CustomerRegisterController(ctx *gin.Context) {
 	return
 }
 
-func (c *customerController) CustomerGet(ctx *gin.Context) {
-	ctx.Status(http.StatusOK)
+func (c *customerController) SearchCustomer(ctx *gin.Context) {
+	var reqQueryParams request.CustomerGetAllQueryParams
+
+	if err := ctx.ShouldBindQuery(&reqQueryParams); err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	customers, err := c.Service.GetAllByParams(&reqQueryParams)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	// Mapping data from service to response
+	customerShows := response.ToCustomerShows(customers)
+	customerMappedResults := response.CustomerToCustomerGetAllResponse(customerShows)
+
+	ctx.JSON(http.StatusOK, customerMappedResults)
 	return
 }

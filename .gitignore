@@ -1,3 +1,4 @@
 .env
 main_enigmanations
 tmp
+.DS_Store
