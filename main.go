@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"enigmanations/eniqlo-store/config"
-	"enigmanations/eniqlo-store/database"
+	"enigmanations/eniqlo-store/pkg/database"
 	"enigmanations/eniqlo-store/pkg/env"
 	"fmt"
 	"log/slog"
