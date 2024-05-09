@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	routes "enigmanations/eniqlo-store/router"
 )
 
 func main() {
@@ -56,6 +57,7 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	// Prepare router
 	router := gin.Default()
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -63,6 +65,8 @@ func main() {
 		})
 	})
 
-	router.Run(fmt.Sprintf("%s:%d", cfg.AppHost, cfg.AppPort))
-	//router.Run()
+	// Register routes
+	routes.RegisterRouter(ctx, pool, router)
+
+	// router.Run(fmt.Sprintf("%s:%d", cfg.AppHost, cfg.AppPort))
 }
