@@ -17,9 +17,9 @@ CREATE TABLE "public"."products" (
     CONSTRAINT products_pkey PRIMARY KEY (id)
 );
 
-CREATE INDEX products_search ON "public"."products" USING gin("_search")
+CREATE INDEX products_search ON "public"."products" USING gin("_search");
 
 CREATE TRIGGER products_vector_update
 BEFORE INSERT OR UPDATE ON "public"."products"
 FOR EACH ROW EXECUTE PROCEDURE
-	tsvector_update_trigger("_search", 'pg_catalog.english', "name")
+	tsvector_update_trigger("_search", 'pg_catalog.english', "name");
