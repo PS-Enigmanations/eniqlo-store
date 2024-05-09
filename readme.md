@@ -37,11 +37,17 @@ make migrateup
 go mod download
 ```
 
-** Run development mode:**
+**Run development mode:**
 
-1. `make setup`
+1. Install [go air](https://github.com/cosmtrek/air):
 
-> Issue?: `air command not found` please follow this guide https://github.com/cosmtrek/air/issues/135#issuecomment-761730669
+```sh
+`make setup` #or
+
+go install github.com/cosmtrek/air@latest
+```
+
+> Issue: `air command not found` please follow this guide https://github.com/cosmtrek/air/issues/135#issuecomment-761730669
 
 2. Start development server:
 
