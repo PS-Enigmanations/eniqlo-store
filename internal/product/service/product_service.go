@@ -5,12 +5,13 @@ import (
 	"enigmanations/eniqlo-store/internal/product"
 	"enigmanations/eniqlo-store/internal/product/repository"
 	"enigmanations/eniqlo-store/internal/product/request"
+	"enigmanations/eniqlo-store/util"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type ProductService interface {
-	SearchProducts(p *request.SearchProductQueryParams) ([]*product.Product, error)
+	SearchProducts(p *request.SearchProductQueryParams) <-chan util.Result[[]*product.Product]
 }
 
 type ProductDependency struct {
@@ -31,13 +32,24 @@ func NewProductService(ctx context.Context, pool *pgxpool.Pool, repo *ProductDep
 	}
 }
 
-func (svc *productService) SearchProducts(p *request.SearchProductQueryParams) ([]*product.Product, error) {
+func (svc *productService) SearchProducts(p *request.SearchProductQueryParams) <-chan util.Result[[]*product.Product] {
 	repo := svc.repo
 
-	products, err := repo.Product.SearchProducts(svc.context, p)
-	if err != nil {
-		return nil, err
-	}
+	result := make(chan util.Result[[]*product.Product])
+	go func() {
+		products, err := repo.Product.SearchProducts(svc.context, p)
+		if err != nil {
+			result <- util.Result[[]*product.Product]{
+				Error: err,
+			}
+			return
+		}
 
-	return products, nil
+		result <- util.Result[[]*product.Product]{
+			Result: products,
+		}
+		close(result)
+	}()
+
+	return result
 }
