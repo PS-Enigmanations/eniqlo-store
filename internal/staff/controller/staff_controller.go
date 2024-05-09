@@ -33,6 +33,10 @@ func (controller *staffController) Register(c *gin.Context) {
 
 	staffCreated, err := controller.Service.Register(c, requestBody)
 	if err != nil {
+		if err.Error() == "invalid phone number" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -63,6 +67,10 @@ func (controller *staffController) Login(c *gin.Context) {
 
 	staffLoggedIn, err := controller.Service.Login(c, requestBody)
 	if err != nil {
+		if err.Error() == "invalid phone number" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
