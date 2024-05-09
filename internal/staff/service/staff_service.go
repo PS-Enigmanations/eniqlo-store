@@ -7,6 +7,7 @@ import (
 	"enigmanations/eniqlo-store/pkg/bcrypt"
 	"enigmanations/eniqlo-store/pkg/jwt"
 	"enigmanations/eniqlo-store/pkg/uuid"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
@@ -28,6 +29,17 @@ func NewStaffService(repo repository.StaffRepository) StaffService {
 
 // Login implements StaffService.
 func (service *staffService) Login(ctx *gin.Context, req request.StaffLoginRequest) (*staff.Staff, error) {
+	isPhoneNumberValid := false
+	countries := staff.Countries
+	for _, country := range countries {
+		if strings.HasPrefix(req.PhoneNumber, country.Code) {
+			isPhoneNumberValid = true
+			break
+		}
+	}
+	if !isPhoneNumberValid {
+		return nil, errors.New("invalid phone number")
+	}
 	staff, err := service.repo.FindByPhoneNumber(ctx.Request.Context(), req.PhoneNumber)
 	if err != nil {
 		return nil, err
@@ -44,6 +56,17 @@ func (service *staffService) Register(ctx *gin.Context, req request.StaffRegiste
 	hashedPassword, err := bcrypt.HashPassword(req.Password)
 	if err != nil {
 		return nil, err
+	}
+	isPhoneNumberValid := false
+	countries := staff.Countries
+	for _, country := range countries {
+		if strings.HasPrefix(req.PhoneNumber, country.Code) {
+			isPhoneNumberValid = true
+			break
+		}
+	}
+	if !isPhoneNumberValid {
+		return nil, errors.New("invalid phone number")
 	}
 	staffId := uuid.New()
 	model := staff.Staff{
