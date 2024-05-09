@@ -7,8 +7,11 @@ import (
 	"enigmanations/eniqlo-store/internal/customer/repository"
 	"enigmanations/eniqlo-store/internal/customer/request"
 	"enigmanations/eniqlo-store/internal/customer/errs"
+	commonErrs "enigmanations/eniqlo-store/internal/common/errs"
 	"enigmanations/eniqlo-store/util"
 	"enigmanations/eniqlo-store/pkg/uuid"
+	"enigmanations/eniqlo-store/pkg/country"
+	"strings"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -33,7 +36,7 @@ func NewCustomerService(ctx context.Context, pool *pgxpool.Pool, repo *CustomerD
 
 func (svc *customerService) Create(payload *request.CustomerRegisterRequest) <-chan util.Result[*customer.Customer] {
 	repo := svc.repo
-
+	isPhoneNumberValid := false
 	result := make(chan util.Result[*customer.Customer])
 
 	go func() {
@@ -42,6 +45,19 @@ func (svc *customerService) Create(payload *request.CustomerRegisterRequest) <-c
 			Id:      		id,
 			Name:			payload.Name,
 			PhoneNumber: 	payload.PhoneNumber,
+		}
+
+		for _, country := range country.Countries {
+			if strings.HasPrefix(payload.PhoneNumber, country.Code) {
+				isPhoneNumberValid = true
+				break
+			}
+		}
+		if !isPhoneNumberValid {
+			result <- util.Result[*customer.Customer]{
+				Error: commonErrs.InvalidPhoneNumber,
+			}
+			return
 		}
 
 		// call FindByPhoneNumber if exists
