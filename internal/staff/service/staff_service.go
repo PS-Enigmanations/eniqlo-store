@@ -7,6 +7,7 @@ import (
 	"enigmanations/eniqlo-store/pkg/bcrypt"
 	"enigmanations/eniqlo-store/pkg/jwt"
 	"enigmanations/eniqlo-store/pkg/uuid"
+	"enigmanations/eniqlo-store/pkg/country"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -30,7 +31,7 @@ func NewStaffService(repo repository.StaffRepository) StaffService {
 // Login implements StaffService.
 func (service *staffService) Login(ctx *gin.Context, req request.StaffLoginRequest) (*staff.Staff, error) {
 	isPhoneNumberValid := false
-	countries := staff.Countries
+	countries := country.Countries
 	for _, country := range countries {
 		if strings.HasPrefix(req.PhoneNumber, country.Code) {
 			isPhoneNumberValid = true
@@ -58,7 +59,7 @@ func (service *staffService) Register(ctx *gin.Context, req request.StaffRegiste
 		return nil, err
 	}
 	isPhoneNumberValid := false
-	countries := staff.Countries
+	countries := country.Countries
 	for _, country := range countries {
 		if strings.HasPrefix(req.PhoneNumber, country.Code) {
 			isPhoneNumberValid = true
