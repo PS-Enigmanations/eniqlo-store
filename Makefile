@@ -10,6 +10,9 @@ MAKEFLAGS += --silent
 ## install: Install missing dependencies. Runs `go get` internally. e.g; make install get=github.com/foo/bar
 install: go-get
 
+setup:
+	go install github.com/cosmtrek/air@latest
+
 ## dev: run build and up on dev environment.
 dev: build up
 

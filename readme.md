@@ -3,6 +3,7 @@
 https://openidea-projectsprint.notion.site/EniQilo-Store-93d69f62951c4c8aaf91e6c090127886?pvs=4
 
 **Environment:**
+
 ```sh
 cp .env.example .env
 ```
@@ -34,4 +35,16 @@ make migrateup
 
 ```sh
 go mod download
+```
+
+** Run development mode:**
+
+1. `make setup`
+
+> Issue?: `air command not found` please follow this guide https://github.com/cosmtrek/air/issues/135#issuecomment-761730669
+
+2. Start development server:
+
+```sh
+air
 ```
