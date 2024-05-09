@@ -18,17 +18,6 @@ type Configuration struct {
 }
 
 func GetConfig() *Configuration {
-
-	appPort, err := env.GetEnvInt("APP_PORT")
-	if err != nil {
-		return nil
-	}
-
-	appHost, err := env.GetEnv("APP_HOST")
-	if err != nil {
-		return nil
-	}
-
 	dbHost, err := env.GetEnv("DB_HOST")
 	if err != nil {
 		return nil
@@ -62,8 +51,8 @@ func GetConfig() *Configuration {
 	}
 
 	return &Configuration{
-		AppPort:    appPort,
-		AppHost:    appHost,
+		AppPort:    8080,
+		AppHost:    "localhost",
 		DBHost:     dbHost,
 		DBUsername: dbUsername,
 		DBPass:     dbPass,
