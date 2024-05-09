@@ -13,6 +13,9 @@ install: go-get
 setup:
 	go install github.com/cosmtrek/air@latest
 
+kill:
+	lsof -t -i tcp:8080 | xargs kill -9
+
 ## dev: run build and up on dev environment.
 dev: build up
 

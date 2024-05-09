@@ -36,17 +36,3 @@ make migrateup
 ```sh
 go mod download
 ```
-
-**Run development mode:**
-
-1. Install [go air](https://github.com/cosmtrek/air):
-
-```sh
-go install github.com/cosmtrek/air@latest
-```
-
-2. Start development server:
-
-```sh
-air
-```

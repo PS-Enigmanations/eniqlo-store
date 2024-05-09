@@ -7,11 +7,16 @@ import (
 	"enigmanations/eniqlo-store/pkg/database"
 	"enigmanations/eniqlo-store/pkg/env"
 	routes "enigmanations/eniqlo-store/router"
+	"errors"
 	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
+	"os/exec"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -27,7 +32,8 @@ func main() {
 	cfg := config.GetConfig()
 
 	// Shared ctx
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	// Connect to the database
 	pgUrl := `postgres://%s:%s@%s:%d/%s?%s`
@@ -69,8 +75,39 @@ func main() {
 	// Register routes
 	routes.RegisterRouter(ctx, pool, router, middleware)
 
-	// Run the server
-	appServeAddr := ":" + fmt.Sprint(cfg.AppPort)
-	fmt.Printf("Serving on http://localhost:%s\n", fmt.Sprint(cfg.AppPort))
-	log.Fatalf("%v", http.ListenAndServe(appServeAddr, router))
+	// Prepare server
+	serveAddr := ":" + fmt.Sprint(cfg.AppPort)
+	server := &http.Server{
+		Addr:    serveAddr,
+		Handler: router,
+	}
+
+	// Wait for interrupt signal to gracefully shutdown the server with
+	// a timeout of 5 seconds.
+	done := make(chan os.Signal)
+	signal.Notify(done, syscall.SIGINT, syscall.SIGTERM)
+
+	// Initializing the server in a goroutine so that
+	// it won't block the graceful shutdown handling below
+	go func() {
+		fmt.Printf("Serving on http://localhost:%s\n", fmt.Sprint(cfg.AppPort))
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			fmt.Errorf("error: %s\n", err)
+		}
+	}()
+
+	<-done
+	log.Println("Shutting down server...")
+
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatalf("Error while shutting down Server. Initiating force shutdown... %v", err.Error())
+	} else {
+		command := fmt.Sprintf("lsof -i tcp:%d | grep LISTEN | awk '{print $2}' | xargs kill -9", cfg.AppPort)
+		err := exec.Command("bash", "-c", command).Run()
+		if err != nil {
+			panic(fmt.Sprintf("Failed to kill process at Port %d\n", cfg.AppPort))
+		}
+
+		fmt.Print("Server exiting")
+	}
 }
