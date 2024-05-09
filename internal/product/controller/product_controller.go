@@ -28,14 +28,14 @@ func (c *productController) SearchProducts(ctx *gin.Context) {
 		return
 	}
 
-	products, err := c.Service.SearchProducts(&reqQueryParams)
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
+	products := <-c.Service.SearchProducts(&reqQueryParams)
+	if products.Error != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, products.Error)
 		return
 	}
 
 	// Mapping data from service to response
-	productShows := response.ToProductShows(products)
+	productShows := response.ToProductShows(products.Result)
 	productMappedResults := response.ProductToSearchProductsResponse(productShows)
 
 	ctx.JSON(http.StatusOK, productMappedResults)
