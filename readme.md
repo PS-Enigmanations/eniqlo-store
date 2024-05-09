@@ -42,12 +42,10 @@ go mod download
 1. Install [go air](https://github.com/cosmtrek/air):
 
 ```sh
-`make setup` #or
+make setup #or
 
 go install github.com/cosmtrek/air@latest
 ```
-
-> Issue: `air command not found` please follow this guide https://github.com/cosmtrek/air/issues/135#issuecomment-761730669
 
 2. Start development server:
 
