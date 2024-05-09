@@ -9,5 +9,11 @@ type CheckoutRequest struct {
 	CustomerId     string           `json:"customerId"`
 	ProductDetails []ProductDetail `json:"productDetails" validate:"required,min=1,dive"`
 	Paid           int              `json:"paid" validate:"required,min=1"`
-	Change         int              `json:"change" validate:"required,min=0"`
+	Change         int              `json:"change" validate:"min=0"`
+}
+
+type TransactionGetAllQueryParams struct {
+	CustomerId string `form:"customer_id"`
+	Limit      string `form:"limit" default:"5"`
+	Offset     string `form:"offset" default:"0"`
 }
