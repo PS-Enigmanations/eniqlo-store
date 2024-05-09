@@ -4,14 +4,16 @@ import (
 	"context"
 	"enigmanations/eniqlo-store/internal/product"
 	"enigmanations/eniqlo-store/internal/product/request"
+	"enigmanations/eniqlo-store/util"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type ProductRepository interface {
-	SearchProducts(ctx context.Context, params *request.SearchProductQueryParams) ([]*product.Product, error)
+	SearchProducts(ctx context.Context, params *request.SearchProductQueryParams, alwaysAvailable bool) ([]*product.Product, error)
 }
 
 type database struct {
@@ -24,10 +26,12 @@ func NewProductRepository(pool *pgxpool.Pool) ProductRepository {
 	}
 }
 
-func (db *database) SearchProducts(ctx context.Context, params *request.SearchProductQueryParams) ([]*product.Product, error) {
+// Always available on search sku
+func (db *database) SearchProducts(ctx context.Context, params *request.SearchProductQueryParams, alwaysAvailable bool) ([]*product.Product, error) {
 	var (
 		args  []any
 		where []string
+		order []string
 	)
 
 	sql := `
@@ -47,8 +51,10 @@ func (db *database) SearchProducts(ctx context.Context, params *request.SearchPr
 	`
 
 	// Request should only show product that have isAvailable == true
-	args = append(args, true)
-	where = append(where, fmt.Sprintf(`"is_available" = $%d`, len(args)))
+	if alwaysAvailable {
+		args = append(args, true)
+		where = append(where, fmt.Sprintf(`"is_available" = $%d`, len(args)))
+	}
 
 	// Name
 	if params.Name != "" {
@@ -82,6 +88,15 @@ func (db *database) SearchProducts(ctx context.Context, params *request.SearchPr
 			where = append(where, fmt.Sprintf(`"stock" = $%d`, len(args)))
 		}
 	}
+	if params.IsAvailable != "" && util.IsBoolFromStr(params.IsAvailable) && !alwaysAvailable {
+		isAvailable, err := strconv.ParseBool(params.IsAvailable)
+		if nil != err {
+			return nil, err
+		}
+
+		args = append(args, isAvailable)
+		where = append(where, fmt.Sprintf(`"is_available" = $%d`, len(args)))
+	}
 
 	// Merge where clauses
 	if len(where) > 0 {
@@ -92,12 +107,27 @@ func (db *database) SearchProducts(ctx context.Context, params *request.SearchPr
 		sql += w
 	}
 
+	// Order by will only execute first operation at a time,
+	// Apply based on latest order by
+	//
 	// Order by price
-	if params.Price != "" {
-		if params.Price == "asc" || params.Price == "desc" {
-			o := " ORDER BY " + fmt.Sprintf("price %s", params.Price)
-			sql += o
-		}
+	if params.Price != "" && util.IsSortType(params.Price) {
+		value := fmt.Sprintf("price %s", params.Price)
+
+		order = []string{}
+		order = append(order, value)
+	}
+	// Order by created at
+	if params.CreatedAt != "" && util.IsSortType(params.CreatedAt) {
+		value := fmt.Sprintf("created_at %s", params.CreatedAt)
+		order = []string{}
+		order = append(order, value)
+	}
+
+	// Merge order clauses
+	if len(order) > 0 {
+		o := " ORDER BY " + strings.Join(order, ", ")
+		sql += o
 	}
 
 	// Limit (default: 5)
