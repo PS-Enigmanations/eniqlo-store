@@ -42,8 +42,6 @@ go mod download
 1. Install [go air](https://github.com/cosmtrek/air):
 
 ```sh
-make setup #or
-
 go install github.com/cosmtrek/air@latest
 ```
 
