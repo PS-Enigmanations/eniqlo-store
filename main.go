@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"enigmanations/eniqlo-store/config"
-	"enigmanations/eniqlo-store/internal/staff/controller"
-	"enigmanations/eniqlo-store/internal/staff/repository"
-	"enigmanations/eniqlo-store/internal/staff/service"
+	"enigmanations/eniqlo-store/middleware"
 	"enigmanations/eniqlo-store/pkg/database"
 	"enigmanations/eniqlo-store/pkg/env"
+	routes "enigmanations/eniqlo-store/router"
 	"fmt"
+	"log"
 	"log/slog"
+	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -59,21 +60,17 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	router := gin.Default()
-	router.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
+	// Prepare middleware
+	middleware := middleware.NewMiddleware(pool)
 
-	// Register the staff controller
-	staffRepository := repository.NewStaffRepository(pool)
-	staffService := service.NewStaffService(staffRepository)
-	staffController := controller.NewStaffController(staffService)
-	router.POST("v1/staff/register", func(c *gin.Context) {
-		staffController.Register(c)
-	})
+	// Prepare router
+	router := gin.New()
 
-	router.Run(fmt.Sprintf("%s:%d", cfg.AppHost, cfg.AppPort))
-	//router.Run()
+	// Register routes
+	routes.RegisterRouter(ctx, pool, router, middleware)
+
+	// Run the server
+	appServeAddr := ":" + fmt.Sprint(cfg.AppPort)
+	fmt.Printf("Serving on http://localhost:%s\n", fmt.Sprint(cfg.AppPort))
+	log.Fatalf("%v", http.ListenAndServe(appServeAddr, router))
 }
