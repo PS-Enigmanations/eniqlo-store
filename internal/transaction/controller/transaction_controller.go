@@ -3,6 +3,7 @@ package controller
 import (
 	"enigmanations/eniqlo-store/internal/transaction/service"
 	"enigmanations/eniqlo-store/internal/transaction/request"
+	"enigmanations/eniqlo-store/internal/transaction/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"fmt"
@@ -49,6 +50,15 @@ func (c *transactionController) SearchTransaction(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Status(http.StatusOK)
+	transactions, err := c.Service.GetAllByParams(&reqQueryParams)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	transactionShows := response.ToTransactionShows(transactions)
+	transactionMappedResults := response.TransactionToTransactionGetAllResponse(transactionShows)
+
+	ctx.JSON(http.StatusOK, transactionMappedResults)
 	return
 }

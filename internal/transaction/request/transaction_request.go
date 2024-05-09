@@ -13,7 +13,8 @@ type CheckoutRequest struct {
 }
 
 type TransactionGetAllQueryParams struct {
-	CustomerId string `form:"customer_id"`
+	CustomerId string `form:"customerId"`
 	Limit      string `form:"limit" default:"5"`
 	Offset     string `form:"offset" default:"0"`
+	CreatedAt   string `form:"createdAt"`
 }

@@ -55,4 +55,4 @@ make dev
 - [x] http://localhost:8080/v1/customer/register
 - [x] http://localhost:8080/v1/customer
 - [ ] http://localhost:8080/v1/product/checkout
-- [ ] http://localhost:8080/v1/product/checkout/history
+- [x] http://localhost:8080/v1/product/checkout/history
