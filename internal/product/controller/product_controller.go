@@ -4,7 +4,6 @@ import (
 	"enigmanations/eniqlo-store/internal/product/request"
 	"enigmanations/eniqlo-store/internal/product/response"
 	"enigmanations/eniqlo-store/internal/product/service"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -31,7 +30,6 @@ func (c *productController) SearchProducts(ctx *gin.Context) {
 
 	products, err := c.Service.SearchProducts(&reqQueryParams)
 	if err != nil {
-		fmt.Print("err", err)
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}

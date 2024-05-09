@@ -1,6 +1,7 @@
 package product
 
 import (
+	"slices"
 	"time"
 )
 
@@ -30,3 +31,27 @@ const (
 	Footwear    Category = "Footwear"
 	Beverages   Category = "Beverages"
 )
+
+type CategoryItem struct {
+	Name   string
+	Search []string
+}
+
+var Categories = []CategoryItem{
+	{Name: "Clothing", Search: []string{"clothing", "Clothing"}},
+	{Name: "Accessories", Search: []string{"accessories", "Accessories"}},
+	{Name: "Footwear", Search: []string{"footwear", "Footwear"}},
+	{Name: "Beverages", Search: []string{"beverages", "Beverages"}},
+}
+
+func IsHasCategory(cat string) bool {
+	found := false
+	for _, item := range Categories {
+		if slices.Contains(item.Search, cat) {
+			found = true
+			break
+		}
+	}
+
+	return found
+}

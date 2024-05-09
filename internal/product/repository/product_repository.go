@@ -5,6 +5,7 @@ import (
 	"enigmanations/eniqlo-store/internal/product"
 	"enigmanations/eniqlo-store/internal/product/request"
 	"fmt"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -49,8 +50,50 @@ func (db *database) SearchProducts(ctx context.Context, params *request.SearchPr
 	if params.Name != "" {
 		args = append(args, params.Name)
 		where = append(where, fmt.Sprintf(`
-			to_tsvector('english', "name") @@ plainto_tsquery('english', $%d)
-		`, len(args)))
+			(
+				p."_search" @@ plainto_tsquery('english', $%d) OR
+				p."name" ilike '$%s'
+			)
+		`, len(args), "%"+fmt.Sprintf("$%d", len(args))+"%"))
+	}
+	// Category
+	if params.Category != "" {
+		if product.IsHasCategory(params.Category) {
+			args = append(args, params.Category)
+			where = append(where, fmt.Sprintf(`"category" ilike $%d`, len(args)))
+		}
+	}
+	// Sku
+	if params.Sku != "" {
+		args = append(args, params.Sku)
+		where = append(where, fmt.Sprintf(`"sku" = $%d`, len(args)))
+	}
+	// In Stock
+	if params.InStock != "" {
+		if params.InStock == "true" {
+			args = append(args, "0")
+			where = append(where, fmt.Sprintf(`"stock" > $%d`, len(args)))
+		} else if params.InStock == "false" {
+			args = append(args, "0")
+			where = append(where, fmt.Sprintf(`"stock" = $%d`, len(args)))
+		}
+	}
+
+	// Merge where clauses
+	if len(where) > 0 {
+		w := " WHERE " + strings.Join(where, " AND ") + " AND deleted_at IS NULL" // #nosec G202
+		sql += w
+	} else {
+		w := " WHERE deleted_at IS NULL"
+		sql += w
+	}
+
+	// Order by price
+	if params.Price != "" {
+		if params.Price == "asc" || params.Price == "desc" {
+			o := " ORDER BY " + fmt.Sprintf("price %s", params.Price)
+			sql += o
+		}
 	}
 
 	// Limit (default: 5)
