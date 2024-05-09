@@ -53,6 +53,6 @@ make dev
 - [ ] http://localhost:8080/v1/product/{id} (DELETE)
 - [x] http://localhost:8080/v1/product/customer
 - [x] http://localhost:8080/v1/customer/register
-- [ ] http://localhost:8080/v1/customer
+- [x] http://localhost:8080/v1/customer
 - [ ] http://localhost:8080/v1/product/checkout
 - [ ] http://localhost:8080/v1/product/checkout/history

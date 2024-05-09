@@ -16,6 +16,7 @@ import (
 )
 
 type CustomerService interface {
+	GetAllByParams(p *request.CustomerGetAllQueryParams) ([]*customer.Customer, error)
 	Create(p *request.CustomerRegisterRequest) <-chan util.Result[*customer.Customer]
 }
 
@@ -32,6 +33,17 @@ type customerService struct {
 // NewService creates an API service.
 func NewCustomerService(ctx context.Context, pool *pgxpool.Pool, repo *CustomerDependency) CustomerService {
 	return &customerService{repo: repo, pool: pool, context: ctx}
+}
+
+func (svc *customerService) GetAllByParams(p *request.CustomerGetAllQueryParams) ([]*customer.Customer, error) {
+	repo := svc.repo
+
+	customers, err := repo.Customer.GetAllByParams(svc.context, p)
+	if err != nil {
+		return nil, err
+	}
+
+	return customers, nil
 }
 
 func (svc *customerService) Create(payload *request.CustomerRegisterRequest) <-chan util.Result[*customer.Customer] {
