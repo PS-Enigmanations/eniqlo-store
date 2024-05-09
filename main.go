@@ -61,7 +61,7 @@ func main() {
 	}
 
 	// Prepare middleware
-	middleware := middleware.NewMiddleware(pool)
+	middleware := middleware.RegisterMiddleware(ctx, pool)
 
 	// Prepare router
 	router := gin.New()

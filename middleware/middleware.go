@@ -1,13 +1,17 @@
 package middleware
 
 import (
+	"context"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Middleware struct {
-	// Auth AuthMiddleware
+	Auth AuthMiddleware
 }
 
-func NewMiddleware(pool *pgxpool.Pool) Middleware {
-	return Middleware{}
+func RegisterMiddleware(ctx context.Context, pool *pgxpool.Pool) Middleware {
+	return Middleware{
+		Auth: NewAuthMiddleware(ctx, pool),
+	}
 }

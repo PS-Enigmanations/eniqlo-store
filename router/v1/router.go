@@ -32,6 +32,7 @@ func (v *v1Router) Load(router *gin.Engine, m middleware.Middleware) {
 		// Customer api endpoint
 		customer := v1.Group("/customer")
 		{
+			customer.Use(m.Auth.MustAuthenticated())
 			customer.GET("/", v.Customer.Controller.CustomerGet)
 			customer.POST("/register", v.Customer.Controller.CustomerRegisterController)
 		}
@@ -46,6 +47,7 @@ func (v *v1Router) Load(router *gin.Engine, m middleware.Middleware) {
 		// Product api endpoint
 		product := v1.Group("/product")
 		{
+			product.Use(m.Auth.MustAuthenticated())
 			product.GET("/customer", v.Product.Controller.SearchProducts)
 		}
 	}
