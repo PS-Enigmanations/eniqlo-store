@@ -36,3 +36,13 @@ make migrateup
 ```sh
 go mod download
 ```
+
+**Run development server:**
+
+```sh
+make dev
+```
+
+### API:
+
+- [x] http://localhost:8080/v1/product/customer
