@@ -37,8 +37,8 @@ func (r *staffRepository) FindById(ctx context.Context, id int) (*staff.Staff, e
 func (r *staffRepository) Save(ctx context.Context, s *staff.Staff) (*staff.Staff, error) {
 
 	staff := &staff.Staff{} // Initialize the staff variable
-	query := "INSERT INTO users (name, phone_number, password) VALUES ($1, $2, $3) RETURNING id, name, phone_number"
-	err := r.pool.QueryRow(ctx, query, s.Name, s.PhoneNumber, s.Password).Scan(
+	query := "INSERT INTO users (id, name, phone_number, password) VALUES ($1, $2, $3, $4) RETURNING id, name, phone_number"
+	err := r.pool.QueryRow(ctx, query, s.ID, s.Name, s.PhoneNumber, s.Password).Scan(
 		&staff.ID,
 		&staff.Name,
 		&staff.PhoneNumber,

@@ -6,5 +6,5 @@ import (
 
 func New() string {
 	uuid := uuid.NewString()
-    return uuid
+	return uuid
 }

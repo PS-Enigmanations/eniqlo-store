@@ -37,10 +37,17 @@ func (controller *staffController) Register(c *gin.Context) {
 		return
 	}
 
+	accessToken, err := controller.Service.GenerateAccessToken(staffCreated)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusCreated, response.StaffResponse{
 		ID:          staffCreated.ID,
 		Name:        staffCreated.Name,
 		PhoneNumber: staffCreated.PhoneNumber,
+		AccessToken: accessToken,
 	})
 }
 

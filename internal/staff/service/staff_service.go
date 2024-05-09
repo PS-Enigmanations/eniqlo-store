@@ -5,13 +5,17 @@ import (
 	"enigmanations/eniqlo-store/internal/staff/repository"
 	"enigmanations/eniqlo-store/internal/staff/request"
 	"enigmanations/eniqlo-store/pkg/bcrypt"
+	"enigmanations/eniqlo-store/pkg/jwt"
+	"enigmanations/eniqlo-store/pkg/uuid"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 )
 
 type StaffService interface {
-	FindById(ctx *gin.Context, id int) (*staff.Staff, error)
+	FindById(ctx *gin.Context, id string) (*staff.Staff, error)
 	Register(ctx *gin.Context, req request.StaffRegisterRequest) (*staff.Staff, error)
+	GenerateAccessToken(staff *staff.Staff) (string, error)
 }
 
 type staffService struct {
@@ -23,7 +27,7 @@ func NewStaffService(repo repository.StaffRepository) StaffService {
 }
 
 // FindById implements StaffService.
-func (service *staffService) FindById(ctx *gin.Context, id int) (*staff.Staff, error) {
+func (service *staffService) FindById(ctx *gin.Context, id string) (*staff.Staff, error) {
 	panic("unimplemented")
 }
 
@@ -33,7 +37,9 @@ func (service *staffService) Register(ctx *gin.Context, req request.StaffRegiste
 	if err != nil {
 		return nil, err
 	}
+	staffId := uuid.New()
 	model := staff.Staff{
+		ID:          staffId,
 		PhoneNumber: req.PhoneNumber,
 		Name:        req.Name,
 		Password:    hashedPassword,
@@ -45,4 +51,13 @@ func (service *staffService) Register(ctx *gin.Context, req request.StaffRegiste
 	}
 
 	return staff, nil
+}
+
+func (service *staffService) GenerateAccessToken(staff *staff.Staff) (string, error) {
+	token, err := jwt.GenerateAccessToken(staff.ID, staff)
+	if err != nil {
+		return "", errors.New("failed to generate access token")
+	}
+
+	return token, nil
 }
