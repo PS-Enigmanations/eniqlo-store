@@ -43,14 +43,43 @@ func (controller *staffController) Register(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, response.StaffResponse{
-		ID:          staffCreated.ID,
-		Name:        staffCreated.Name,
-		PhoneNumber: staffCreated.PhoneNumber,
-		AccessToken: accessToken,
+	c.JSON(http.StatusCreated, gin.H{
+		"Message": "User registered successfully",
+		"Data": response.StaffResponse{
+			ID:          staffCreated.ID,
+			Name:        staffCreated.Name,
+			PhoneNumber: staffCreated.PhoneNumber,
+			AccessToken: accessToken,
+		},
 	})
 }
 
-func (*staffController) Login(c *gin.Context) {
-	panic("implement me")
+func (controller *staffController) Login(c *gin.Context) {
+	var requestBody request.StaffLoginRequest
+	if err := c.ShouldBindJSON(&requestBody); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	staffLoggedIn, err := controller.Service.Login(c, requestBody)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	accessToken, err := controller.Service.GenerateAccessToken(staffLoggedIn)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"Message": "User logged in successfully",
+		"Data": response.StaffResponse{
+			ID:          staffLoggedIn.ID,
+			Name:        staffLoggedIn.Name,
+			PhoneNumber: staffLoggedIn.PhoneNumber,
+			AccessToken: accessToken,
+		},
+	})
 }

@@ -10,6 +10,7 @@ import (
 type StaffRepository interface {
 	FindById(ctx context.Context, id int) (*staff.Staff, error)
 	Save(ctx context.Context, s *staff.Staff) (*staff.Staff, error)
+	Login(ctx context.Context, phoeNumber string, password string) (*staff.Staff, error)
 }
 
 type staffRepository struct {
@@ -24,6 +25,20 @@ func (r *staffRepository) FindById(ctx context.Context, id int) (*staff.Staff, e
 	staff := &staff.Staff{}
 	query := "SELECT id, name, phone_number FROM users WHERE id = $1"
 	err := r.pool.QueryRow(ctx, query, id).Scan(
+		&staff.ID,
+		&staff.Name,
+		&staff.PhoneNumber,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return staff, nil
+}
+
+func (r *staffRepository) Login(ctx context.Context, phoneNumber string, password string) (*staff.Staff, error) {
+	staff := &staff.Staff{}
+	query := "SELECT id, name, phone_number FROM users WHERE phone_number = $1 AND password = $2"
+	err := r.pool.QueryRow(ctx, query, phoneNumber, password).Scan(
 		&staff.ID,
 		&staff.Name,
 		&staff.PhoneNumber,

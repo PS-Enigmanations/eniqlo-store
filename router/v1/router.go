@@ -40,6 +40,7 @@ func (v *v1Router) Load(router *gin.Engine, m middleware.Middleware) {
 		staff := v1.Group("/staff")
 		{
 			staff.POST("/register", v.Staff.Controller.Register)
+			staff.POST("/login", v.Staff.Controller.Login)
 		}
 
 		// Product api endpoint

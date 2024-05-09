@@ -13,7 +13,7 @@ import (
 )
 
 type StaffService interface {
-	FindById(ctx *gin.Context, id string) (*staff.Staff, error)
+	Login(ctx *gin.Context, req request.StaffLoginRequest) (*staff.Staff, error)
 	Register(ctx *gin.Context, req request.StaffRegisterRequest) (*staff.Staff, error)
 	GenerateAccessToken(staff *staff.Staff) (string, error)
 }
@@ -26,9 +26,18 @@ func NewStaffService(repo repository.StaffRepository) StaffService {
 	return &staffService{repo: repo}
 }
 
-// FindById implements StaffService.
-func (service *staffService) FindById(ctx *gin.Context, id string) (*staff.Staff, error) {
-	panic("unimplemented")
+// Login implements StaffService.
+func (service *staffService) Login(ctx *gin.Context, req request.StaffLoginRequest) (*staff.Staff, error) {
+	hashedPassword, err := bcrypt.HashPassword(req.Password)
+	if err != nil {
+		return nil, err
+	}
+	staff, err := service.repo.Login(ctx.Request.Context(), req.PhoneNumber, hashedPassword)
+	if err != nil {
+		return nil, err
+	}
+
+	return staff, nil
 }
 
 // Register implements StaffService.
