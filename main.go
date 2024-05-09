@@ -63,6 +63,8 @@ func main() {
 		})
 	})
 
+	router.POST("/v1/staff/register")
+
 	router.Run(fmt.Sprintf("%s:%d", cfg.AppHost, cfg.AppPort))
 	//router.Run()
 }
