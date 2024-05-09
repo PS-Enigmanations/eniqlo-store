@@ -16,7 +16,7 @@ type CustomerRouter struct {
 func NewCustomerRouter(ctx context.Context, pool *pgxpool.Pool) *CustomerRouter {
 	customerRepository := repository.NewCustomerRepository(pool)
 
-	customerService := service.NewCatService(
+	customerService := service.NewCustomerService(
 		ctx,
 		pool,
 		&service.CustomerDependency{

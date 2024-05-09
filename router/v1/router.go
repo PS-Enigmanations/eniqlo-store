@@ -31,7 +31,7 @@ func (v *v1Router) Load(router *gin.Engine, m middleware.Middleware) {
 		customer := v1.Group("/customer")
 		{
 			customer.GET("/", v.Customer.Controller.CustomerGet)
-			customer.POST("/register", v.Customer.Controller.CustomerRegister)
+			customer.POST("/register", v.Customer.Controller.CustomerRegisterController)
 		}
 
 		// Product api endpoint
