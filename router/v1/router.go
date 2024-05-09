@@ -15,12 +15,14 @@ type V1Router interface {
 type v1Router struct {
 	Product  *ProductRouter
 	Customer *CustomerRouter
+	Staff    *StaffRouter
 }
 
 func NewV1Router(ctx context.Context, pool *pgxpool.Pool) *v1Router {
 	return &v1Router{
 		Product:  NewProductRouter(ctx, pool),
 		Customer: NewCustomerRouter(ctx, pool),
+		Staff:    NewStaffRouter(ctx, pool),
 	}
 }
 
@@ -32,6 +34,13 @@ func (v *v1Router) Load(router *gin.Engine, m middleware.Middleware) {
 		{
 			customer.GET("/", v.Customer.Controller.CustomerGet)
 			customer.POST("/register", v.Customer.Controller.CustomerRegisterController)
+		}
+
+		//Staff api endpoint
+		staff := v1.Group("/staff")
+		{
+			staff.POST("/register", v.Staff.Controller.Register)
+			staff.POST("/login", v.Staff.Controller.Login)
 		}
 
 		// Product api endpoint
