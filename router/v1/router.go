@@ -32,10 +32,10 @@ func (v *v1Router) Load(router *gin.Engine, m middleware.Middleware) {
 	v1 := router.Group("/v1")
 	{
 		// Customer api endpoint
-		customer := v1.Group("/customer")
+		customer := v1.Group("/customer").Use(m.Auth.MustAuthenticated())
 		{
-			customer.GET("/", m.Auth.MustAuthenticated(), v.Customer.Controller.SearchCustomer)
-			customer.POST("/register", m.Auth.MustAuthenticated(), v.Customer.Controller.Register)
+			customer.GET("/", v.Customer.Controller.SearchCustomer)
+			customer.POST("/register", v.Customer.Controller.Register)
 		}
 
 		//Staff api endpoint
@@ -48,16 +48,17 @@ func (v *v1Router) Load(router *gin.Engine, m middleware.Middleware) {
 		// Product api endpoint
 		product := v1.Group("/product")
 		{
-			product.GET("/", m.Auth.MustAuthenticated(), v.Product.Controller.Index)
-			product.POST("/", m.Auth.MustAuthenticated(), v.Product.Controller.CreateProduct)
-			product.PUT("/:id", m.Auth.MustAuthenticated(), v.Product.Controller.UpdateProduct)
-			product.DELETE("/:id", m.Auth.MustAuthenticated(), v.Product.Controller.DeleteProduct)
+			product.Use(m.Auth.MustAuthenticated())
+			product.GET("/", v.Product.Controller.Index)
+			product.POST("/", v.Product.Controller.CreateProduct)
+			product.PUT("/:id", v.Product.Controller.UpdateProduct)
+			product.DELETE("/:id", v.Product.Controller.DeleteProduct)
 			product.GET("/customer", v.Product.Controller.SearchProducts)
 
 			checkout := product.Group("/checkout")
 			{
-				checkout.GET("/history", m.Auth.MustAuthenticated(), v.Transaction.Controller.SearchTransaction)
-				checkout.POST("/", m.Auth.MustAuthenticated(), v.Transaction.Controller.Checkout)
+				checkout.POST("/", v.Transaction.Controller.Checkout)
+				checkout.GET("/history", v.Transaction.Controller.SearchTransaction)
 			}
 		}
 	}
