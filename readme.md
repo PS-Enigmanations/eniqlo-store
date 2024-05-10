@@ -77,31 +77,37 @@ Open http://localhost:8080
 
 ### Publishing Docker images:
 
-> Migrate database first (for production, if needed)
-
 **1. Push to the registry**
 
 ```sh
+# Migrate database first (if needed)
+# Or if you want to migrate from local
+#
+# Run:
+# 1. docker-compose up --build postgres
+# 2. cat db/init.sql | docker exec -i enigmanations_postgres_container psql -h localhost -p 5432 -U postgres -d eniqlo-store
+
+# The password needs to be requested from the author, @natserract.
 export DOCKER_PASSWORD="" && bash ./docker-deploy.sh
 ```
 
 ### Run from registry:
 
-1. Pull from registry https://hub.docker.com/repository/docker/natserract/enigmanations-inventory
+**1. Pull from registry** https://hub.docker.com/repository/docker/natserract/enigmanations-inventory
 
 ```sh
 docker pull natserract/enigmanations-inventory:latest
 ```
 
-2. Run
+**2. Run**
 
 ```sh
 docker run -it --rm --network app_network -p 8080:8080 \
--e ENV=production \
--e DB_HOST=host.docker.internal \
--e DB_USERNAME=postgres \
--e DB_PASSWORD=postgres \
--e DB_NAME=eniqlo-store natserract/enigmanations-inventory
+    -e ENV=production \
+    -e DB_HOST=host.docker.internal \
+    -e DB_USERNAME=postgres \
+    -e DB_PASSWORD=postgres \
+    -e DB_NAME=eniqlo-store natserract/enigmanations-inventory
 ```
 
 ### API:
