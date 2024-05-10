@@ -4,10 +4,12 @@ import (
 	"enigmanations/eniqlo-store/internal/transaction/service"
 	"enigmanations/eniqlo-store/internal/transaction/request"
 	"enigmanations/eniqlo-store/internal/transaction/response"
+	custErrs "enigmanations/eniqlo-store/internal/customer/errs"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"fmt"
 	"github.com/go-playground/validator/v10"
+	"errors"
 )
 
 type TransactionController interface {
@@ -38,6 +40,20 @@ func (c *transactionController) Checkout(ctx *gin.Context) {
 		ctx.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
+
+	checkoutCreated := <-c.Service.Create(&reqBody)
+	if checkoutCreated.Error != nil {
+		switch {
+		case errors.Is(checkoutCreated.Error, custErrs.CustomerIsNotExists):
+			ctx.AbortWithError(http.StatusNotFound, checkoutCreated.Error)
+			break
+		default:
+			ctx.AbortWithError(http.StatusInternalServerError, checkoutCreated.Error)
+			break
+		}
+		return
+	}
+
 	ctx.Status(http.StatusOK)
 	return
 }
