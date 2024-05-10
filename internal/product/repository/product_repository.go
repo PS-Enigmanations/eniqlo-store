@@ -15,6 +15,7 @@ import (
 type ProductRepository interface {
 	SearchProducts(ctx context.Context, params *request.SearchProductQueryParams, alwaysAvailable bool) ([]*product.Product, error)
 	SaveProduct(ctx context.Context, p *product.Product) (*product.Product, error)
+	DeleteProduct(ctx context.Context, id string) error
 }
 
 type database struct {
@@ -254,4 +255,20 @@ func (db *database) SaveProduct(ctx context.Context, p *product.Product) (*produ
 	}
 
 	return p, nil
+}
+
+func (db *database) DeleteProduct(ctx context.Context, id string) error {
+	sql := `
+		UPDATE products
+		SET
+			deleted_at = now()
+		WHERE
+			id = $1
+	`
+	_, err := db.pool.Exec(ctx, sql, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

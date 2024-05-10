@@ -16,6 +16,7 @@ type ProductService interface {
 	SearchProducts(p *request.SearchProductQueryParams) <-chan util.Result[[]*product.Product]
 	GetProducts(p *request.SearchProductQueryParams) <-chan util.Result[[]*product.Product]
 	SaveProduct(p *request.ProductRequest) (*product.Product, error)
+	DeleteProduct(id string) error
 }
 
 type ProductDependency struct {
@@ -116,4 +117,15 @@ func (svc *productService) SaveProduct(p *request.ProductRequest) (*product.Prod
 	}
 
 	return product, nil
+}
+
+func (svc *productService) DeleteProduct(id string) error {
+	repo := svc.repo
+
+	err := repo.Product.DeleteProduct(svc.context, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

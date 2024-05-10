@@ -14,6 +14,7 @@ type ProductController interface {
 	Index(ctx *gin.Context)
 	CreateProduct(ctx *gin.Context)
 	UpdateProduct(ctx *gin.Context)
+	DeleteProduct(ctx *gin.Context)
 }
 
 type productController struct {
@@ -100,5 +101,18 @@ func (c *productController) UpdateProduct(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "Product updated successfully",
+	})
+}
+
+func (c *productController) DeleteProduct(ctx *gin.Context) {
+	id := ctx.Param("id")
+	err := c.Service.DeleteProduct(id)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Product deleted successfully",
 	})
 }

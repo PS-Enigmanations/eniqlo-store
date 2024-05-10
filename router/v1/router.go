@@ -51,6 +51,7 @@ func (v *v1Router) Load(router *gin.Engine, m middleware.Middleware) {
 			product.GET("/", m.Auth.MustAuthenticated(), v.Product.Controller.Index)
 			product.POST("/", m.Auth.MustAuthenticated(), v.Product.Controller.CreateProduct)
 			product.PUT("/:id", m.Auth.MustAuthenticated(), v.Product.Controller.UpdateProduct)
+			product.DELETE("/:id", m.Auth.MustAuthenticated(), v.Product.Controller.DeleteProduct)
 			product.GET("/customer", m.Auth.MustAuthenticated(), v.Product.Controller.SearchProducts)
 
 			checkout := product.Group("/checkout")
