@@ -9,10 +9,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type ProductRepository interface {
+	FindById(ctx context.Context, id string) (*product.Product, error)
 	SearchProducts(ctx context.Context, params *request.SearchProductQueryParams, alwaysAvailable bool) ([]*product.Product, error)
 	SaveProduct(ctx context.Context, p *product.Product) (*product.Product, error)
 	DeleteProduct(ctx context.Context, id string) error
@@ -271,4 +273,25 @@ func (db *database) DeleteProduct(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+func (db *database) FindById(ctx context.Context, id string) (*product.Product, error) {
+	const sql = `
+		SELECT id, price, stock FROM products WHERE id = $1 LIMIT 1;
+	`
+	row := db.pool.QueryRow(ctx, sql, id)
+	c := new(product.Product)
+	err := row.Scan(
+		&c.Id,
+		&c.Price,
+		&c.Stock,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return c, nil
 }

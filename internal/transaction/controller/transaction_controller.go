@@ -5,6 +5,7 @@ import (
 	"enigmanations/eniqlo-store/internal/transaction/request"
 	"enigmanations/eniqlo-store/internal/transaction/response"
 	custErrs "enigmanations/eniqlo-store/internal/customer/errs"
+	productErrs "enigmanations/eniqlo-store/internal/product/errs"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"fmt"
@@ -45,6 +46,9 @@ func (c *transactionController) Checkout(ctx *gin.Context) {
 	if checkoutCreated.Error != nil {
 		switch {
 		case errors.Is(checkoutCreated.Error, custErrs.CustomerIsNotExists):
+			ctx.AbortWithError(http.StatusNotFound, checkoutCreated.Error)
+			break
+		case errors.Is(checkoutCreated.Error, productErrs.ProductIsNotExists):
 			ctx.AbortWithError(http.StatusNotFound, checkoutCreated.Error)
 			break
 		default:
