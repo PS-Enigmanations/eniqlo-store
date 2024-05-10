@@ -53,7 +53,7 @@ up:
 
 ## up: run docker-compose up with production environment.
 up-prod:
-	JWT_SECRET=a-very-secretive-secret-key ./main_enigmanations
+	ENV=production JWT_SECRET=a-very-secretive-secret-key ./main_enigmanations
 
 ## run golang-migrate up
 migrateup:
