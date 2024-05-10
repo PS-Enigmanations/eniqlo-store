@@ -7,8 +7,11 @@ import (
 	"enigmanations/eniqlo-store/internal/transaction/request"
 	"enigmanations/eniqlo-store/internal/transaction/repository"
 	custRepository "enigmanations/eniqlo-store/internal/customer/repository"
+	productRepository "enigmanations/eniqlo-store/internal/product/repository"
 	custErrs "enigmanations/eniqlo-store/internal/customer/errs"
-
+	productErrs "enigmanations/eniqlo-store/internal/product/errs"
+	"fmt"
+	"enigmanations/eniqlo-store/pkg/validate"
 	"enigmanations/eniqlo-store/util"
 )
 
@@ -19,6 +22,7 @@ type TransactionService interface {
 
 type TransactionDependency struct {
 	Transaction      repository.TransactionRepository
+	Product      	 productRepository.ProductRepository
 	Customer      	 custRepository.CustomerRepository
 }
 
@@ -50,6 +54,32 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 				Error: err,
 			}
 			return
+		}
+
+		for _, detail := range p.ProductDetails {
+			validateUuid := validate.IsValidUUID(detail.ProductId)
+
+			if !validateUuid {
+				result <- util.Result[interface{}]{
+					Error: productErrs.ProductIsNotExists,
+				}
+				return
+			}
+
+			productExists, err := repo.Product.FindById(svc.context, detail.ProductId)
+			if err != nil {
+				result <- util.Result[interface{}]{
+					Error: err,
+				}
+				return
+			}
+
+			if productExists == nil {
+				result <- util.Result[interface{}]{
+					Error: productErrs.ProductIsNotExists,
+				}
+				return
+			}
 		}
 
 		result <- util.Result[interface{}]{}

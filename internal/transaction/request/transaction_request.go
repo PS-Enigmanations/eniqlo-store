@@ -7,7 +7,7 @@ type ProductDetail struct {
 
 type CheckoutRequest struct {
 	CustomerId     string           `json:"customerId"`
-	ProductDetails []ProductDetail `json:"productDetails" validate:"required,min=1,dive"`
+	ProductDetails []ProductDetail 	`json:"productDetails" validate:"required,min=1,dive"`
 	Paid           int              `json:"paid" validate:"required,min=1"`
 	Change         int              `json:"change" validate:"min=0"`
 }
