@@ -13,6 +13,7 @@ import (
 type CustomerRepository interface {
 	Save(ctx context.Context, model customer.Customer) (*customer.Customer, error)
 	FindByPhoneNumber(ctx context.Context, phoneNumber string) (*customer.Customer, error)
+	FindById(ctx context.Context, id string) (*customer.Customer, error)
 	GetAllByParams(ctx context.Context, params *request.CustomerGetAllQueryParams) ([]*customer.Customer, error)
 }
 
@@ -150,4 +151,25 @@ func (db *Database) GetAllByParams(ctx context.Context, params *request.Customer
 
 	// return cats slice and nil for the error
 	return customers, nil
+}
+
+func (db *Database) FindById(ctx context.Context, id string) (*customer.Customer, error) {
+	const sql = `
+		SELECT id, name, phone_number FROM customers WHERE id = $1 AND deleted_at IS NULL LIMIT 1;
+	`
+	row := db.pool.QueryRow(ctx, sql, id)
+	c := new(customer.Customer)
+	err := row.Scan(
+		&c.Id,
+		&c.Name,
+		&c.PhoneNumber,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return c, nil
 }

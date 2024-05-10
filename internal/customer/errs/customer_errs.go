@@ -6,7 +6,8 @@ import (
 )
 
 var (
-	CustomerExist         = errors.New("Phone number already exists")
+	CustomerExist         		= errors.New("Phone number already exists")
+	CustomerIsNotExists         = errors.New("Customer is not exists")
 )
 
 type CustomerError struct {
