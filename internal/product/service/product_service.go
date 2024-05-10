@@ -7,6 +7,7 @@ import (
 	"enigmanations/eniqlo-store/internal/product/request"
 	"enigmanations/eniqlo-store/pkg/uuid"
 	"enigmanations/eniqlo-store/util"
+	"errors"
 	"strconv"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -122,7 +123,16 @@ func (svc *productService) SaveProduct(p *request.ProductRequest) (*product.Prod
 func (svc *productService) DeleteProduct(id string) error {
 	repo := svc.repo
 
-	err := repo.Product.DeleteProduct(svc.context, id)
+	product, err := repo.Product.SearchProducts(svc.context, &request.SearchProductQueryParams{Id: id}, false)
+	if err != nil {
+		return err
+	}
+
+	if len(product) == 0 {
+		return errors.New("product not found")
+	}
+
+	err = repo.Product.DeleteProduct(svc.context, id)
 	if err != nil {
 		return err
 	}
