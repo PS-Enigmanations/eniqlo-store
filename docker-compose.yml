@@ -14,6 +14,18 @@ services:
     networks:
       - app_network
 
+  migrate:
+    image: migrate/migrate
+    container_name: enigmanations_db_migrations_container
+    volumes:
+      - .:/db/migrations
+    command: "-database 'postgres://postgres:iatuyachie1Hae4Maih5izee1vie6Ooxu@projectsprint-db.cavsdeuj9ixh.ap-southeast-1.rds.amazonaws.com:5432/postgres?sslrootcert=ap-southeast-1-bundle.pem&sslmode=verify-full' -path db/migrations up 2"
+    restart: on-failure
+    depends_on:
+      - postgres
+    networks:
+      - app_network
+
   api:
     container_name: enigmanations_api_container
     tty: true

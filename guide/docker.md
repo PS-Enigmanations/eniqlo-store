@@ -21,7 +21,13 @@ docker rmi -f <REPOSITORY_NAME>:<TAG_NAME>
 docker inspect <CONTAINER_NAME>
 ```
 
-##$ Migrate local database to docker
+## Create database
+
+```sh
+docker exec -it enigmanations_postgres_container psql -h localhost -p 5432 -U postgres -c 'create database "eniqlo-store"'
+```
+
+## Migrate local database to docker
 
 ```sh
 cat db/init.sql | docker exec -i enigmanations_postgres_container psql -h localhost -p 5432 -U postgres -d eniqlo-store
@@ -51,4 +57,10 @@ docker-compose up --build api
 
 ```sh
 docker-compose up --build
+```
+
+### Check current active container
+
+```sh
+docker ps -a
 ```

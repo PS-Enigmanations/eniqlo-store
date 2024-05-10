@@ -45,23 +45,35 @@ make dev
 
 ### Docker:
 
-1. Migrate database
+## Running on development mode:
 
-```sh
-docker-compose up --build postgres
-
-cat db/init.sql | docker exec -i postgres_container psql -h localhost -p 5432 -U postgres -d eniqlo-store
-```
-
-2. Running API:
+1. Create Network
 
 ```sh
 # Create a network, which allows containers to communicate
 # with each other, by using their container name as a hostname
 docker network create app_network
+```
 
+2. Build postgres container
+
+```sh
+docker-compose up --build postgres
+```
+
+3. Migrate database
+
+```sh
+migrate -path db/migrations -database "postgres://postgres:postgres@0.0.0.0:5430/eniqlo-store?sslmode=disable" up
+```
+
+4. Running API:
+
+```sh
 docker-compose up --build api
 ```
+
+Open http://localhost:8080
 
 ### API:
 
