@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"enigmanations/eniqlo-store/internal/common/auth"
 	"enigmanations/eniqlo-store/internal/staff/repository"
 	"enigmanations/eniqlo-store/pkg/jwt"
 	"log"
@@ -47,6 +48,7 @@ func (am AuthMiddleware) MustAuthenticated() gin.HandlerFunc {
 		}
 
 		c.Header("Authorization", "Bearer "+token)
+		c.Set(auth.AuthorizationPayloadKey, decodedToken)
 		c.Next()
 	}
 }
