@@ -86,7 +86,7 @@ docker-compose --env-file .env up --build migrate
 **2. Push to the registry**
 
 ```sh
-export DOCKER_PASSWORD=<PASSWORD??> && bash ./docker-deploy.sh
+export DOCKER_PASSWORD=<??> && bash ./docker-deploy.sh
 ```
 
 ### API:
