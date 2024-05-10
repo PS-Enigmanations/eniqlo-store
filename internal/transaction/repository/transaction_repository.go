@@ -49,7 +49,8 @@ func (db *Database) GetAllByParams(ctx context.Context, params *request.Transact
 				'quantity', td.quantity
 			)) AS productDetails,
 			t.paid,
-			t.change
+			t.change,
+			t.created_at
 		FROM transactions t JOIN 
 			transaction_details td ON t.id = td.transaction_id  
 		`)
@@ -58,6 +59,15 @@ func (db *Database) GetAllByParams(ctx context.Context, params *request.Transact
 	if params.CustomerId != "" {
 		args = append(args, params.CustomerId)
 		where = append(where, fmt.Sprintf(`"customer_id" = $%d`, len(args)))
+	}
+
+	// Merge where clauses
+	if len(where) > 0 {
+		w := " WHERE " + strings.Join(where, " AND ") + " GROUP BY t.id " // #nosec G202
+		sql += w
+	} else {
+		w := " GROUP BY t.id "
+		sql += w
 	}
 
 	// Order by created at
@@ -71,15 +81,6 @@ func (db *Database) GetAllByParams(ctx context.Context, params *request.Transact
 	if len(order) > 0 {
 		o := " ORDER BY " + strings.Join(order, ", ")
 		sql += o
-	}
-
-	// Merge where clauses
-	if len(where) > 0 {
-		w := " WHERE " + strings.Join(where, " AND ") + " GROUP BY t.id" // #nosec G202
-		sql += w
-	} else {
-		w := " GROUP BY t.id"
-		sql += w
 	}
 
 	// Limit (default: 5)
@@ -96,6 +97,7 @@ func (db *Database) GetAllByParams(ctx context.Context, params *request.Transact
 		sql += fmt.Sprintf(` OFFSET %d`, 0)
 	}
 
+	fmt.Println(sql)
 	rows, err := db.pool.Query(ctx, sql, args...)
 	if err != nil {
 		return nil, err
@@ -116,6 +118,7 @@ func (db *Database) GetAllByParams(ctx context.Context, params *request.Transact
 				&productDetailsJSON, // Scan into a byte slice
 				&c.Paid,
 				&c.Change,
+				&c.CreatedAt,
 			)
 
 			if err != nil {

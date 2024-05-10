@@ -11,11 +11,13 @@ type ProductShow struct {
 	Name      string    `json:"name"`
 	Sku       string    `json:"sku"`
 	Category  string    `json:"category"`
+	Notes  	  string   	`json:"notes"`
 	ImageUrl  string    `json:"imageUrl"`
 	Stock     int       `json:"stock"`
 	Price     float64   `json:"price"`
 	Location  string    `json:"location"`
-	CreatedAt time.Time `json:"created_at"`
+	IsAvailable  bool    `json:"isAvailable"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type ProductCreateResponse struct {
@@ -45,6 +47,8 @@ func ToProductShows(p []*product.Product) ProductShows {
 			Category:  string(item.Category),
 			ImageUrl:  item.ImageUrl,
 			Stock:     item.Stock,
+			Notes:     item.Notes,
+			IsAvailable: item.IsAvailable,
 			Price:     item.Price,
 			Location:  item.Location,
 			CreatedAt: item.CreatedAt,
