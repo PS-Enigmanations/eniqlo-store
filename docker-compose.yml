@@ -4,6 +4,7 @@ services:
   postgres:
     image: postgres:14-bullseye
     container_name: enigmanations_postgres_container
+    restart: always
     environment:
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
@@ -19,7 +20,7 @@ services:
     build: .
     environment:
       - ENV=production
-      - DB_HOST=0.0.0.0
+      - DB_HOST=host.docker.internal
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
@@ -44,4 +45,4 @@ volumes:
 
 networks:
   app_network:
-    driver: bridge
+    external: true
