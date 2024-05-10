@@ -18,9 +18,6 @@ COPY *.go ./
 # Build the Go app
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o main_enigmanations .
 
-# Init db
-COPY db/*.sql /docker-entrypoint-initdb.d/
-
 # Expose port 8080
 EXPOSE 8080
 

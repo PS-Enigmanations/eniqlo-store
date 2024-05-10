@@ -5,7 +5,7 @@
 -- Dumped from database version 13.8
 -- Dumped by pg_dump version 13.8
 
--- Started on 2024-05-10 10:04:09 WITA
+-- Started on 2024-05-10 11:11:03 WITA
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -179,9 +179,11 @@ ALTER TABLE public.users OWNER TO postgres;
 -- Data for Name: customers; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.customers VALUES ('c5c0e5c7-62c5-4e6e-8f6d-09cc12345678', 'John Doe', '1234567890', '2024-05-09 14:07:09.516022+08', NULL, NULL);
-INSERT INTO public.customers VALUES ('2c1b08f9-3c43-42d2-b0f2-b55e98765432', 'Jane Smith', '9876543210', '2024-05-09 14:07:09.516022+08', NULL, NULL);
-INSERT INTO public.customers VALUES ('6f704b33-eb4b-49b1-af32-0ae655432167', 'Alice Johnson', '5551234567', '2024-05-09 14:07:09.516022+08', NULL, NULL);
+COPY public.customers (id, name, phone_number, created_at, updated_at, deleted_at) FROM stdin;
+c5c0e5c7-62c5-4e6e-8f6d-09cc12345678	John Doe	1234567890	2024-05-09 14:07:09.516022+08	\N	\N
+2c1b08f9-3c43-42d2-b0f2-b55e98765432	Jane Smith	9876543210	2024-05-09 14:07:09.516022+08	\N	\N
+6f704b33-eb4b-49b1-af32-0ae655432167	Alice Johnson	5551234567	2024-05-09 14:07:09.516022+08	\N	\N
+\.
 
 
 --
@@ -190,10 +192,12 @@ INSERT INTO public.customers VALUES ('6f704b33-eb4b-49b1-af32-0ae655432167', 'Al
 -- Data for Name: products; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.products VALUES ('0f8fad5b-d9cb-469f-a165-70867728950e', 'Blue T-Shirt', 'TS001', 'Clothing', 'https://example.com/image1.jpg', 'Comfortable cotton material', 15.99, 50, 'Warehouse A', true, '''blue'':1 ''shirt'':4 ''t-shirt'':2', '2024-05-09 14:07:09.516022+08', NULL, NULL);
-INSERT INTO public.products VALUES ('7c9e6679-7425-40de-944b-e07fc1f90ae7', 'Black Leather Belt', 'BLB002', 'Accessories', 'https://example.com/image2.jpg', 'Genuine leather, adjustable buckle', 29.99, 30, 'Warehouse B', true, '''belt'':3 ''black'':1 ''leather'':2', '2024-05-09 14:07:09.516022+08', NULL, NULL);
-INSERT INTO public.products VALUES ('8f14e45f-ceea-167a-5a36-dedd4bea2543', 'Running Shoes', 'SH003', 'Footwear', 'https://example.com/image3.jpg', 'Breathable mesh, cushioned sole', 49.99, 100, 'Warehouse C', true, '''run'':1 ''shoe'':2', '2023-05-09 14:07:09.516+08', NULL, NULL);
-INSERT INTO public.products VALUES ('c9f0f895-fb98-ab91-59f5-1fd0297e236d', 'Green Tea', 'GT004', 'Beverages', 'https://example.com/image4.jpg', 'Organic green tea leaves', 7.99, 0, 'Warehouse D', false, '''green'':1 ''tea'':2', '2024-06-09 14:07:09.516+08', NULL, NULL);
+COPY public.products (id, name, sku, category, image_url, notes, price, stock, location, is_available, _search, created_at, updated_at, deleted_at) FROM stdin;
+0f8fad5b-d9cb-469f-a165-70867728950e	Blue T-Shirt	TS001	Clothing	https://example.com/image1.jpg	Comfortable cotton material	15.99	50	Warehouse A	t	'blue':1 'shirt':4 't-shirt':2	2024-05-09 14:07:09.516022+08	\N	\N
+7c9e6679-7425-40de-944b-e07fc1f90ae7	Black Leather Belt	BLB002	Accessories	https://example.com/image2.jpg	Genuine leather, adjustable buckle	29.99	30	Warehouse B	t	'belt':3 'black':1 'leather':2	2024-05-09 14:07:09.516022+08	\N	\N
+8f14e45f-ceea-167a-5a36-dedd4bea2543	Running Shoes	SH003	Footwear	https://example.com/image3.jpg	Breathable mesh, cushioned sole	49.99	100	Warehouse C	t	'run':1 'shoe':2	2023-05-09 14:07:09.516+08	\N	\N
+c9f0f895-fb98-ab91-59f5-1fd0297e236d	Green Tea	GT004	Beverages	https://example.com/image4.jpg	Organic green tea leaves	7.99	0	Warehouse D	f	'green':1 'tea':2	2024-06-09 14:07:09.516+08	\N	\N
+\.
 
 
 --
@@ -202,7 +206,9 @@ INSERT INTO public.products VALUES ('c9f0f895-fb98-ab91-59f5-1fd0297e236d', 'Gre
 -- Data for Name: schema_migrations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.schema_migrations VALUES (20240506152354, false);
+COPY public.schema_migrations (version, dirty) FROM stdin;
+20240506152354	f
+\.
 
 
 --
@@ -211,9 +217,11 @@ INSERT INTO public.schema_migrations VALUES (20240506152354, false);
 -- Data for Name: transaction_details; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.transaction_details VALUES ('7b52009b-8b3c-4dc4-8f11-345bea012345', '33e19244-91a0-4e7b-90c8-41bf8e0514e1', '0f8fad5b-d9cb-469f-a165-70867728950e', 2, 31.98, '2024-05-06 12:00:00+08', NULL);
-INSERT INTO public.transaction_details VALUES ('60e2dece-087b-40ab-a4c9-7865dc987654', 'de9fb3b0-7b98-4c90-bd6b-35b8f75432fc', '7c9e6679-7425-40de-944b-e07fc1f90ae7', 1, 29.99, '2024-05-06 12:00:00+08', NULL);
-INSERT INTO public.transaction_details VALUES ('3f7b709b-41b2-4c5c-ae5f-1f669d012345', 'd4d7b6f2-ae92-4ee4-bfa7-f789f0d12345', '8f14e45f-ceea-167a-5a36-dedd4bea2543', 3, 149.97, '2024-05-06 12:00:00+08', NULL);
+COPY public.transaction_details (id, transaction_id, product_id, quantity, total, created_at, updated_at) FROM stdin;
+7b52009b-8b3c-4dc4-8f11-345bea012345	33e19244-91a0-4e7b-90c8-41bf8e0514e1	0f8fad5b-d9cb-469f-a165-70867728950e	2	31.98	2024-05-06 12:00:00+08	\N
+60e2dece-087b-40ab-a4c9-7865dc987654	de9fb3b0-7b98-4c90-bd6b-35b8f75432fc	7c9e6679-7425-40de-944b-e07fc1f90ae7	1	29.99	2024-05-06 12:00:00+08	\N
+3f7b709b-41b2-4c5c-ae5f-1f669d012345	d4d7b6f2-ae92-4ee4-bfa7-f789f0d12345	8f14e45f-ceea-167a-5a36-dedd4bea2543	3	149.97	2024-05-06 12:00:00+08	\N
+\.
 
 
 --
@@ -222,9 +230,11 @@ INSERT INTO public.transaction_details VALUES ('3f7b709b-41b2-4c5c-ae5f-1f669d01
 -- Data for Name: transactions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.transactions VALUES ('33e19244-91a0-4e7b-90c8-41bf8e0514e1', 'c5c0e5c7-62c5-4e6e-8f6d-09cc12345678', 150.99, 160.00, 9.01, '2024-05-06 12:00:00+08', NULL);
-INSERT INTO public.transactions VALUES ('de9fb3b0-7b98-4c90-bd6b-35b8f75432fc', '2c1b08f9-3c43-42d2-b0f2-b55e98765432', 75.50, 80.00, 4.50, '2024-05-06 12:00:00+08', NULL);
-INSERT INTO public.transactions VALUES ('d4d7b6f2-ae92-4ee4-bfa7-f789f0d12345', '6f704b33-eb4b-49b1-af32-0ae655432167', 200.00, 200.00, 0, '2024-05-06 12:00:00+08', NULL);
+COPY public.transactions (id, customer_id, total, paid, change, created_at, updated_at) FROM stdin;
+33e19244-91a0-4e7b-90c8-41bf8e0514e1	c5c0e5c7-62c5-4e6e-8f6d-09cc12345678	150.99	160.00	9.01	2024-05-06 12:00:00+08	\N
+de9fb3b0-7b98-4c90-bd6b-35b8f75432fc	2c1b08f9-3c43-42d2-b0f2-b55e98765432	75.50	80.00	4.50	2024-05-06 12:00:00+08	\N
+d4d7b6f2-ae92-4ee4-bfa7-f789f0d12345	6f704b33-eb4b-49b1-af32-0ae655432167	200.00	200.00	0	2024-05-06 12:00:00+08	\N
+\.
 
 
 --
@@ -233,9 +243,11 @@ INSERT INTO public.transactions VALUES ('d4d7b6f2-ae92-4ee4-bfa7-f789f0d12345', 
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.users VALUES ('7a5da8e5-8f41-4e22-bdb9-d3c63f0b2f6e', 'John Doe', '1234567890', '$2a$08$byUr0FmFYtz8zVp7RzsU8.ASjdwAKGAwL6n.nPU6J4g6VNpDx/utu', '2024-05-09 14:07:09.516022+08', NULL, NULL);
-INSERT INTO public.users VALUES ('b19ab0d0-0c49-47ff-8575-4a34a72b0e17', 'Jane Smith', '9876543210', '$2a$08$byUr0FmFYtz8zVp7RzsU8.ASjdwAKGAwL6n.nPU6J4g6VNpDx/utu', '2024-05-09 14:07:09.516022+08', NULL, NULL);
-INSERT INTO public.users VALUES ('f2bb0d18-8ef3-4d7a-a2fc-0744f13e32b7', 'Alice Johnson', '5551234567', '$2a$08$byUr0FmFYtz8zVp7RzsU8.ASjdwAKGAwL6n.nPU6J4g6VNpDx/utu', '2024-05-09 14:07:09.516022+08', NULL, NULL);
+COPY public.users (id, name, phone_number, password, created_at, updated_at, deleted_at) FROM stdin;
+7a5da8e5-8f41-4e22-bdb9-d3c63f0b2f6e	John Doe	1234567890	$2a$08$byUr0FmFYtz8zVp7RzsU8.ASjdwAKGAwL6n.nPU6J4g6VNpDx/utu	2024-05-09 14:07:09.516022+08	\N	\N
+b19ab0d0-0c49-47ff-8575-4a34a72b0e17	Jane Smith	9876543210	$2a$08$byUr0FmFYtz8zVp7RzsU8.ASjdwAKGAwL6n.nPU6J4g6VNpDx/utu	2024-05-09 14:07:09.516022+08	\N	\N
+f2bb0d18-8ef3-4d7a-a2fc-0744f13e32b7	Alice Johnson	5551234567	$2a$08$byUr0FmFYtz8zVp7RzsU8.ASjdwAKGAwL6n.nPU6J4g6VNpDx/utu	2024-05-09 14:07:09.516022+08	\N	\N
+\.
 
 
 --
@@ -351,7 +363,7 @@ ALTER TABLE ONLY public.transactions
     ADD CONSTRAINT fk_transactions_customer FOREIGN KEY (customer_id) REFERENCES public.customers(id);
 
 
--- Completed on 2024-05-10 10:04:10 WITA
+-- Completed on 2024-05-10 11:11:04 WITA
 
 --
 -- PostgreSQL database dump complete

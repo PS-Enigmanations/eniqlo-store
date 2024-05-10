@@ -39,7 +39,7 @@ func NewPGXPool(ctx context.Context, connString string, logger tracelog.Logger) 
 		return nil, fmt.Errorf("pgx connection error: %w", err)
 	}
 
-	fmt.Println("Successfully connected to database")
+	fmt.Printf("Successfully connected to database %s %v", connString, "\n")
 	return pool, nil
 
 }

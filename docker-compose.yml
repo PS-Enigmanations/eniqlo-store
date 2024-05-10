@@ -2,37 +2,45 @@ version: "3.9"
 
 services:
   postgres:
-    image: postgres:12-bullseye
-    container_name: postgres_container
+    image: postgres:14-bullseye
+    container_name: enigmanations_postgres_container
     environment:
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
-      - DATABASE_HOST=${DB_HOST}
     ports:
       - 5430:5432
     networks:
       - app_network
 
   api:
-    container_name: enigmanations-inventory-service
+    container_name: enigmanations_api_container
     tty: true
     build: .
     environment:
       - ENV=production
+      - DB_HOST=0.0.0.0
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=5430
+      - DB_PARAMS=${DB_PARAMS}
+      - APP_HOST=localhost
+      - APP_PORT=8080
+      - BCRYPT_SALT=${BCRYPT_SALT}
     ports:
       - 8080:8080
     restart: on-failure
     volumes:
-      - api_volume:/app/
+      - database_postgres:/var/lib/postgresql/data
     depends_on:
       - postgres
     networks:
       - app_network
 
 volumes:
-  database_dockerizing:
-  api_volume:
+  api:
+  database_postgres:
 
 networks:
   app_network:
