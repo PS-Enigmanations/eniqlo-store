@@ -13,6 +13,7 @@ import (
 	"enigmanations/eniqlo-store/pkg/country"
 	"strings"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"fmt"
 )
 
 type CustomerService interface {
@@ -60,7 +61,7 @@ func (svc *customerService) Create(payload *request.CustomerRegisterRequest) <-c
 		}
 
 		for _, country := range country.Countries {
-			if strings.HasPrefix(payload.PhoneNumber, country.Code) {
+			if strings.HasPrefix(payload.PhoneNumber, fmt.Sprintf("%s%s", "+", country)) {
 				isPhoneNumberValid = true
 				break
 			}
