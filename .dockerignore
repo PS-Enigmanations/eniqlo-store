@@ -21,3 +21,16 @@ Dockerfile
 .dockerignore
 
 guide/*
+
+# Project
+FAQ.md
+README.md
+LICENSE
+.gitignore
+.travis.yml
+CONTRIBUTING.md
+MIGRATIONS.md
+docker-deploy.sh
+
+# Golang
+testing

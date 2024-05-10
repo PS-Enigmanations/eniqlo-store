@@ -75,6 +75,20 @@ docker-compose up --build api
 
 Open http://localhost:8080
 
+### Publishing Docker images:
+
+**1. Migrate database (for production, if needed)**
+
+```sh
+docker-compose --env-file .env up --build migrate
+```
+
+**2. Push to the registry**
+
+```sh
+export DOCKER_PASSWORD=<PASSWORD??> && bash ./docker-deploy.sh
+```
+
 ### API:
 
 - [x] http://localhost:8080/v1/staff/register

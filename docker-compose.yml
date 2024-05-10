@@ -19,7 +19,7 @@ services:
     container_name: enigmanations_db_migrations_container
     volumes:
       - .:/db/migrations
-    command: "-database 'postgres://postgres:iatuyachie1Hae4Maih5izee1vie6Ooxu@projectsprint-db.cavsdeuj9ixh.ap-southeast-1.rds.amazonaws.com:5432/postgres?sslrootcert=ap-southeast-1-bundle.pem&sslmode=verify-full' -path db/migrations up 2"
+    command: "-database '${DB_URI}' -path db/migrations up"
     restart: on-failure
     depends_on:
       - postgres
