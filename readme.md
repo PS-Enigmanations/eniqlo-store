@@ -43,11 +43,11 @@ go mod download
 make dev
 ```
 
-### Docker:
+## Docker:
 
-## Running on development mode:
+### Running on development mode:
 
-1. Create Network
+**1. Create Network**
 
 ```sh
 # Create a network, which allows containers to communicate
@@ -55,19 +55,19 @@ make dev
 docker network create app_network
 ```
 
-2. Build postgres container
+**2. Build postgres container**
 
 ```sh
 docker-compose up --build postgres
 ```
 
-3. Migrate database
+**3. Migrate database**
 
 ```sh
 migrate -path db/migrations -database "postgres://postgres:postgres@0.0.0.0:5430/eniqlo-store?sslmode=disable" up
 ```
 
-4. Running API:
+**4. Running API:**
 
 ```sh
 docker-compose up --build api
