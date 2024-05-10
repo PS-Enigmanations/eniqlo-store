@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"enigmanations/eniqlo-store/pkg/env"
 	"fmt"
 	"log/slog"
 
@@ -25,9 +26,12 @@ func NewPGXPool(ctx context.Context, connString string, logger tracelog.Logger) 
 		return nil, err
 	}
 
-	conf.ConnConfig.Tracer = &tracelog.TraceLog{
-		Logger:   logger,
-		LogLevel: tracelog.LogLevelInfo,
+	// Only show on development mode
+	if !env.IsProduction() {
+		conf.ConnConfig.Tracer = &tracelog.TraceLog{
+			Logger:   logger,
+			LogLevel: tracelog.LogLevelInfo,
+		}
 	}
 
 	// pgxpool default max number of connections is the number of CPUs on your machine returned by runtime.NumCPU().

@@ -4,8 +4,8 @@ import (
 	"enigmanations/eniqlo-store/internal/product/request"
 	"enigmanations/eniqlo-store/internal/product/response"
 	"enigmanations/eniqlo-store/internal/product/service"
-	"net/http"
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -45,6 +45,7 @@ func (c *productController) Index(ctx *gin.Context) {
 	productMappedResults := response.ProductToSearchProductsResponse(productShows)
 
 	ctx.JSON(http.StatusOK, productMappedResults)
+	return
 }
 
 func (c *productController) SearchProducts(ctx *gin.Context) {

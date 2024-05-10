@@ -1,14 +1,15 @@
 package repository
 
 import (
+	"context"
+	"encoding/json"
 	"enigmanations/eniqlo-store/internal/transaction"
 	"enigmanations/eniqlo-store/internal/transaction/request"
 	"enigmanations/eniqlo-store/util"
-	"context"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"fmt"
-	"encoding/json"
 	"strings"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type TransactionRepository interface {
@@ -37,11 +38,8 @@ func (db *Database) GetAllByParams(ctx context.Context, params *request.Transact
 		order []string
 	)
 
-	fmt.Println(params.CustomerId)
-	
-	 
 	sql := fmt.Sprintf(`
-		SELECT 
+		SELECT
 			t.id AS transactionId,
 			t.customer_id AS customerId,
 			json_agg(json_build_object(
@@ -51,8 +49,8 @@ func (db *Database) GetAllByParams(ctx context.Context, params *request.Transact
 			t.paid,
 			t.change,
 			t.created_at
-		FROM transactions t JOIN 
-			transaction_details td ON t.id = td.transaction_id  
+		FROM transactions t JOIN
+			transaction_details td ON t.id = td.transaction_id
 		`)
 
 	// Filter customer id
@@ -89,7 +87,7 @@ func (db *Database) GetAllByParams(ctx context.Context, params *request.Transact
 	} else {
 		sql += fmt.Sprintf(` LIMIT %d`, 5)
 	}
-	
+
 	// Offset (default: 0)
 	if params.Offset != "" {
 		sql += fmt.Sprintf(` OFFSET %s`, params.Offset)
@@ -97,7 +95,6 @@ func (db *Database) GetAllByParams(ctx context.Context, params *request.Transact
 		sql += fmt.Sprintf(` OFFSET %d`, 0)
 	}
 
-	fmt.Println(sql)
 	rows, err := db.pool.Query(ctx, sql, args...)
 	if err != nil {
 		return nil, err
