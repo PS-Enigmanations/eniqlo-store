@@ -87,9 +87,9 @@ func (controller *staffController) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"Message": "User logged in successfully",
-		"Data": response.StaffResponse{
+	c.JSON(http.StatusOK, gin.H{
+		"message": "User logged in successfully",
+		"data": response.StaffResponse{
 			ID:          staffLoggedIn.ID,
 			Name:        staffLoggedIn.Name,
 			PhoneNumber: staffLoggedIn.PhoneNumber,
