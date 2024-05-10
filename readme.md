@@ -55,7 +55,7 @@ make dev
 docker network create app_network
 ```
 
-**2. Build postgres container**
+**2. Start a Postgres instance**
 
 ```sh
 docker-compose up --build postgres
@@ -67,10 +67,10 @@ docker-compose up --build postgres
 migrate -path db/migrations -database "postgres://postgres:postgres@0.0.0.0:5430/eniqlo-store?sslmode=disable" up
 ```
 
-**4. Running API:**
+**4. Running API**
 
 ```sh
-export DB_HOST=host.docker.internal && docker-compose up --build api
+docker-compose up --build api
 ```
 
 Open http://localhost:8080
@@ -82,7 +82,7 @@ Open http://localhost:8080
 **1. Push to the registry**
 
 ```sh
-export DOCKER_PASSWORD=<??> && bash ./docker-deploy.sh
+export DOCKER_PASSWORD="" && bash ./docker-deploy.sh
 ```
 
 ### API:
