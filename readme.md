@@ -70,7 +70,7 @@ migrate -path db/migrations -database "postgres://postgres:postgres@0.0.0.0:5430
 **4. Running API:**
 
 ```sh
-export DB_HOST=host.docker.internal docker-compose up --build api
+export DB_HOST=host.docker.internal && docker-compose up --build api
 ```
 
 Open http://localhost:8080
