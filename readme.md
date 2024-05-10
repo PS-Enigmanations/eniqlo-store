@@ -45,7 +45,7 @@ make dev
 
 ## Docker:
 
-### Running on development mode:
+### Running on your local machine:
 
 **1. Create Network**
 
