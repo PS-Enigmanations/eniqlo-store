@@ -85,6 +85,25 @@ Open http://localhost:8080
 export DOCKER_PASSWORD="" && bash ./docker-deploy.sh
 ```
 
+### Run from registry:
+
+1. Pull from registry https://hub.docker.com/repository/docker/natserract/enigmanations-inventory
+
+```sh
+docker pull natserract/enigmanations-inventory:latest
+```
+
+2. Run
+
+```sh
+docker run -it --rm --network app_network -p 8080:8080 \
+-e ENV=production \
+-e DB_HOST=host.docker.internal \
+-e DB_USERNAME=postgres \
+-e DB_PASSWORD=postgres \
+-e DB_NAME=eniqlo-store natserract/enigmanations-inventory
+```
+
 ### API:
 
 - [x] http://localhost:8080/v1/staff/register
