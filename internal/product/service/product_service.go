@@ -15,7 +15,7 @@ import (
 type ProductService interface {
 	SearchProducts(p *request.SearchProductQueryParams) <-chan util.Result[[]*product.Product]
 	GetProducts(p *request.SearchProductQueryParams) <-chan util.Result[[]*product.Product]
-	SaveProduct(p *request.ProductCreateRequest) (*product.Product, error)
+	SaveProduct(p *request.ProductRequest) (*product.Product, error)
 }
 
 type ProductDependency struct {
@@ -80,7 +80,7 @@ func (svc *productService) GetProducts(p *request.SearchProductQueryParams) <-ch
 	return result
 }
 
-func (svc *productService) SaveProduct(p *request.ProductCreateRequest) (*product.Product, error) {
+func (svc *productService) SaveProduct(p *request.ProductRequest) (*product.Product, error) {
 	repo := svc.repo
 
 	price, err := strconv.ParseFloat(p.Price, 64)
@@ -93,6 +93,9 @@ func (svc *productService) SaveProduct(p *request.ProductCreateRequest) (*produc
 	}
 
 	productId := uuid.New()
+	if p.Id != "" {
+		productId = p.Id
+	}
 
 	product := &product.Product{
 		Id:          productId,

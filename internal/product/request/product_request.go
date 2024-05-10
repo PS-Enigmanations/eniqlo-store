@@ -15,7 +15,8 @@ type SearchProductQueryParams struct {
 	Offset string `form:"offset" default:"0"`
 }
 
-type ProductCreateRequest struct {
+type ProductRequest struct {
+	Id          string `form:"id"`
 	Name        string `form:"name" binding:"required"`
 	Sku         string `form:"sku" binding:"required"`
 	Category    string `form:"category" binding:"oneof=Clothing Accessories Footwear Beverages"`
