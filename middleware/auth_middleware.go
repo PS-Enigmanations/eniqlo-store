@@ -26,7 +26,7 @@ func (am AuthMiddleware) MustAuthenticated() gin.HandlerFunc {
 		// Check if the user is authenticated
 		token, err := jwt.GetTokenFromAuthHeader(c.Request)
 		if err != nil {
-			c.JSON(401, gin.H{"error": err.Error()})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			c.Abort()
 			return
 		}
@@ -34,7 +34,7 @@ func (am AuthMiddleware) MustAuthenticated() gin.HandlerFunc {
 		decodedToken, err := jwt.ValidateToken(token)
 		log.Println(decodedToken)
 		if err != nil {
-			c.JSON(401, gin.H{"error": err.Error()})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			c.Abort()
 			return
 		}
