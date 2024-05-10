@@ -6,7 +6,8 @@ import (
 )
 
 var (
-	ProductIsNotExists         = errors.New("Product is not exists")
+	ProductIsNotExists       = errors.New("Product is not exists")
+	StockIsNotEnough         = errors.New("Stock is not enough")
 )
 
 type ProductError struct {
