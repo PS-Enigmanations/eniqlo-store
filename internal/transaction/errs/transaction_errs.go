@@ -7,6 +7,7 @@ import (
 
 var (
 	PaidIsNotEnough         = errors.New("Paid is not enough")
+	ChangeIsNotRight		= errors.New("Change is not right")
 )
 
 type TransactionError struct {
