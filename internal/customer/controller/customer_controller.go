@@ -1,13 +1,13 @@
 package controller
 
 import (
-	"enigmanations/eniqlo-store/internal/customer/service"
+	commonErrs "enigmanations/eniqlo-store/internal/common/errs"
+	"enigmanations/eniqlo-store/internal/customer/errs"
 	"enigmanations/eniqlo-store/internal/customer/request"
 	"enigmanations/eniqlo-store/internal/customer/response"
-	"enigmanations/eniqlo-store/internal/customer/errs"
-	commonErrs "enigmanations/eniqlo-store/internal/common/errs"
-	"net/http"
+	"enigmanations/eniqlo-store/internal/customer/service"
 	"errors"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -49,7 +49,7 @@ func (c *customerController) Register(ctx *gin.Context) {
 			ctx.AbortWithError(http.StatusConflict, customerCreated.Error)
 			break
 		case errors.Is(customerCreated.Error, commonErrs.InvalidPhoneNumber):
-			ctx.AbortWithError(http.StatusBadRequest,customerCreated.Error)
+			ctx.AbortWithError(http.StatusBadRequest, customerCreated.Error)
 			break
 		default:
 			ctx.AbortWithError(http.StatusInternalServerError, customerCreated.Error)

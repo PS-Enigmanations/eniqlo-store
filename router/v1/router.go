@@ -13,18 +13,18 @@ type V1Router interface {
 }
 
 type v1Router struct {
-	Product  	*ProductRouter
-	Customer 	*CustomerRouter
-	Staff    	*StaffRouter
+	Product     *ProductRouter
+	Customer    *CustomerRouter
+	Staff       *StaffRouter
 	Transaction *TransactionRouter
 }
 
 func NewV1Router(ctx context.Context, pool *pgxpool.Pool) *v1Router {
 	return &v1Router{
-		Product:  		NewProductRouter(ctx, pool),
-		Customer: 		NewCustomerRouter(ctx, pool),
-		Staff:    		NewStaffRouter(ctx, pool),
-		Transaction: 	NewTransactionRouter(ctx, pool),
+		Product:     NewProductRouter(ctx, pool),
+		Customer:    NewCustomerRouter(ctx, pool),
+		Staff:       NewStaffRouter(ctx, pool),
+		Transaction: NewTransactionRouter(ctx, pool),
 	}
 }
 
@@ -34,8 +34,8 @@ func (v *v1Router) Load(router *gin.Engine, m middleware.Middleware) {
 		// Customer api endpoint
 		customer := v1.Group("/customer")
 		{
-			customer.GET("/", v.Customer.Controller.SearchCustomer)
-			customer.POST("/register", v.Customer.Controller.Register)
+			customer.GET("/", m.Auth.MustAuthenticated(), v.Customer.Controller.SearchCustomer)
+			customer.POST("/register", m.Auth.MustAuthenticated(), v.Customer.Controller.Register)
 		}
 
 		//Staff api endpoint
@@ -48,12 +48,12 @@ func (v *v1Router) Load(router *gin.Engine, m middleware.Middleware) {
 		// Product api endpoint
 		product := v1.Group("/product")
 		{
-			product.GET("/customer", v.Product.Controller.SearchProducts)
+			product.GET("/customer", m.Auth.MustAuthenticated(), v.Product.Controller.SearchProducts)
 
 			checkout := product.Group("/checkout")
 			{
-				checkout.GET("/history", v.Transaction.Controller.SearchTransaction)
-				checkout.POST("/", v.Transaction.Controller.Checkout)
+				checkout.GET("/history", m.Auth.MustAuthenticated(), v.Transaction.Controller.SearchTransaction)
+				checkout.POST("/", m.Auth.MustAuthenticated(), v.Transaction.Controller.Checkout)
 			}
 		}
 	}

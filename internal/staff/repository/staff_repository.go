@@ -10,7 +10,7 @@ import (
 )
 
 type StaffRepository interface {
-	FindById(ctx context.Context, id int) (*staff.Staff, error)
+	FindById(ctx context.Context, id string) (*staff.Staff, error)
 	FindByPhoneNumber(ctx context.Context, phoneNumber string) (*staff.Staff, error)
 	Save(ctx context.Context, s *staff.Staff) (*staff.Staff, error)
 	Login(ctx context.Context, phoeNumber string, password string) (*staff.Staff, error)
@@ -24,7 +24,7 @@ func NewStaffRepository(pool *pgxpool.Pool) StaffRepository {
 	return &staffRepository{pool: pool}
 }
 
-func (r *staffRepository) FindById(ctx context.Context, id int) (*staff.Staff, error) {
+func (r *staffRepository) FindById(ctx context.Context, id string) (*staff.Staff, error) {
 	staff := &staff.Staff{}
 	query := "SELECT id, name, phone_number FROM users WHERE id = $1"
 	err := r.pool.QueryRow(ctx, query, id).Scan(
