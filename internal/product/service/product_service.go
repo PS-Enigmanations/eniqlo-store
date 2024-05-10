@@ -37,7 +37,7 @@ func (svc *productService) SearchProducts(p *request.SearchProductQueryParams) <
 
 	result := make(chan util.Result[[]*product.Product])
 	go func() {
-		products, err := repo.Product.SearchProducts(svc.context, p)
+		products, err := repo.Product.SearchProducts(svc.context, p, true)
 		if err != nil {
 			result <- util.Result[[]*product.Product]{
 				Error: err,

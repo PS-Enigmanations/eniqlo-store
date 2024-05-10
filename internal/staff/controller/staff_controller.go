@@ -1,10 +1,12 @@
 package controller
 
 import (
+	"enigmanations/eniqlo-store/internal/staff/errs"
 	"enigmanations/eniqlo-store/internal/staff/request"
 	"enigmanations/eniqlo-store/internal/staff/response"
 	"enigmanations/eniqlo-store/internal/staff/service"
 	"net/http"
+	"errors"
 
 	"github.com/gin-gonic/gin"
 )
@@ -33,8 +35,12 @@ func (controller *staffController) Register(c *gin.Context) {
 
 	staffCreated, err := controller.Service.Register(c, requestBody)
 	if err != nil {
+		if errors.Is(err, errs.UserExist) {
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+			return
+		}
 		if err.Error() == "invalid phone number" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -48,8 +54,8 @@ func (controller *staffController) Register(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"Message": "User registered successfully",
-		"Data": response.StaffResponse{
+		"message": "User registered successfully",
+		"data": response.StaffResponse{
 			ID:          staffCreated.ID,
 			Name:        staffCreated.Name,
 			PhoneNumber: staffCreated.PhoneNumber,
@@ -81,9 +87,9 @@ func (controller *staffController) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"Message": "User logged in successfully",
-		"Data": response.StaffResponse{
+	c.JSON(http.StatusOK, gin.H{
+		"message": "User logged in successfully",
+		"data": response.StaffResponse{
 			ID:          staffLoggedIn.ID,
 			Name:        staffLoggedIn.Name,
 			PhoneNumber: staffLoggedIn.PhoneNumber,
