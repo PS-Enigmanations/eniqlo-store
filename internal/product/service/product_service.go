@@ -8,7 +8,6 @@ import (
 	"enigmanations/eniqlo-store/pkg/uuid"
 	"enigmanations/eniqlo-store/util"
 	"errors"
-	"strconv"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -85,15 +84,6 @@ func (svc *productService) GetProducts(p *request.SearchProductQueryParams) <-ch
 func (svc *productService) SaveProduct(p *request.ProductRequest) (*product.Product, error) {
 	repo := svc.repo
 
-	price, err := strconv.ParseFloat(p.Price, 64)
-	if err != nil {
-		return nil, err
-	}
-	stock, err := strconv.ParseInt(p.Stock, 10, 64)
-	if err != nil {
-		return nil, err
-	}
-
 	productId := uuid.New()
 	if p.Id != "" {
 		productId = p.Id
@@ -106,13 +96,13 @@ func (svc *productService) SaveProduct(p *request.ProductRequest) (*product.Prod
 		Category:    product.Category(p.Category),
 		ImageUrl:    p.ImageUrl,
 		Notes:       p.Notes,
-		Price:       price,
-		Stock:       int(stock),
+		Price:       p.Price,
+		Stock:       p.Stock,
 		Location:    p.Location,
-		IsAvailable: p.IsAvailable == "true",
+		IsAvailable: p.IsAvailable,
 	}
 
-	product, err = repo.Product.SaveProduct(svc.context, product)
+	product, err := repo.Product.SaveProduct(svc.context, product)
 	if err != nil {
 		return nil, err
 	}

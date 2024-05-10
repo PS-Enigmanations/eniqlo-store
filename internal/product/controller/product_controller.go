@@ -5,8 +5,10 @@ import (
 	"enigmanations/eniqlo-store/internal/product/response"
 	"enigmanations/eniqlo-store/internal/product/service"
 	"net/http"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type ProductController interface {
@@ -72,6 +74,15 @@ func (c *productController) CreateProduct(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	validate := validator.New()
+	err := validate.Struct(reqBody)
+	if err != nil {
+		fmt.Println(err)
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
 	// send data to service layer to further process (create record)
 	productCreated, err := c.Service.SaveProduct(&reqBody)
 	if err != nil {

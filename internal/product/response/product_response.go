@@ -20,7 +20,7 @@ type ProductShow struct {
 
 type ProductCreateResponse struct {
 	Id        string    `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type ProductShows []ProductShow
