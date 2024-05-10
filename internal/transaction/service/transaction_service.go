@@ -10,8 +10,10 @@ import (
 	productRepository "enigmanations/eniqlo-store/internal/product/repository"
 	custErrs "enigmanations/eniqlo-store/internal/customer/errs"
 	productErrs "enigmanations/eniqlo-store/internal/product/errs"
+	"enigmanations/eniqlo-store/internal/transaction/errs"
 	"enigmanations/eniqlo-store/pkg/validate"
 	"enigmanations/eniqlo-store/util"
+	// "fmt"
 )
 
 type TransactionService interface {
@@ -55,6 +57,8 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 			return
 		}
 
+		total := 0
+
 		for _, detail := range p.ProductDetails {
 			validateUuid := validate.IsValidUUID(detail.ProductId)
 
@@ -79,6 +83,15 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 				}
 				return
 			}
+
+			total += int(productExists.Price * float64(detail.Quantity))
+		}
+
+		if total > p.Paid {
+			result <- util.Result[interface{}]{
+				Error: errs.PaidIsNotEnough,
+			}
+			return
 		}
 
 		result <- util.Result[interface{}]{}
