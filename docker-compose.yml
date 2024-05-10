@@ -14,18 +14,6 @@ services:
     networks:
       - app_network
 
-  migrate:
-    image: migrate/migrate
-    container_name: enigmanations_db_migrations_container
-    volumes:
-      - .:/db/migrations
-    command: "-database '${DB_URI}' -path db/migrations up"
-    restart: on-failure
-    depends_on:
-      - postgres
-    networks:
-      - app_network
-
   api:
     container_name: enigmanations_api_container
     tty: true
