@@ -43,6 +43,18 @@ go mod download
 make dev
 ```
 
+### Docker:
+
+Running on docker:
+
+```sh
+# Create a network, which allows containers to communicate
+# with each other, by using their container name as a hostname
+docker network create app_network
+
+docker-compose up --build
+```
+
 ### API:
 
 - [x] http://localhost:8080/v1/staff/register

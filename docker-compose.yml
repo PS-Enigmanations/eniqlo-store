@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:12-bullseye
+    container_name: postgres_container
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - DATABASE_HOST=${DB_HOST}
+    ports:
+      - 5430:5432
+    networks:
+      - app_network
+
+  api:
+    container_name: enigmanations-inventory-service
+    tty: true
+    build: .
+    ports:
+      - 8080:8080
+    restart: on-failure
+    volumes:
+      - api_volume:/app/
+    depends_on:
+      - postgres
+    networks:
+      - app_network
+
+volumes:
+  database_dockerizing:
+  api_volume:
+
+networks:
+  app_network:
+    driver: bridge
