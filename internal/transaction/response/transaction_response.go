@@ -20,6 +20,7 @@ func ToTransactionShows(c []*transaction.Transaction) []TransactionShow {
 			ProductDetails: 	item.ProductDetails,
 			Paid:        		item.Paid,
 			Change: 			item.Change,
+			CreatedAt: 			item.CreatedAt,
 		}
 	}
 
