@@ -4,6 +4,7 @@ import (
 	"enigmanations/eniqlo-store/internal/staff"
 	"enigmanations/eniqlo-store/internal/staff/repository"
 	"enigmanations/eniqlo-store/internal/staff/request"
+	"enigmanations/eniqlo-store/internal/staff/errs"
 	"enigmanations/eniqlo-store/pkg/bcrypt"
 	"enigmanations/eniqlo-store/pkg/jwt"
 	"enigmanations/eniqlo-store/pkg/uuid"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
+	"fmt"
 )
 
 type StaffService interface {
@@ -33,7 +35,7 @@ func (service *staffService) Login(ctx *gin.Context, req request.StaffLoginReque
 	isPhoneNumberValid := false
 	countries := country.Countries
 	for _, country := range countries {
-		if strings.HasPrefix(req.PhoneNumber, country.Code) {
+		if strings.HasPrefix(req.PhoneNumber, fmt.Sprintf("%s%s", "+", country)) {
 			isPhoneNumberValid = true
 			break
 		}
@@ -61,7 +63,7 @@ func (service *staffService) Register(ctx *gin.Context, req request.StaffRegiste
 	isPhoneNumberValid := false
 	countries := country.Countries
 	for _, country := range countries {
-		if strings.HasPrefix(req.PhoneNumber, country.Code) {
+		if strings.HasPrefix(req.PhoneNumber, fmt.Sprintf("%s%s", "+", country)) {
 			isPhoneNumberValid = true
 			break
 		}
@@ -75,6 +77,15 @@ func (service *staffService) Register(ctx *gin.Context, req request.StaffRegiste
 		PhoneNumber: req.PhoneNumber,
 		Name:        req.Name,
 		Password:    hashedPassword,
+	}
+
+	staffFound, err := service.repo.FindByPhoneNumber(ctx.Request.Context(), req.PhoneNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	if staffFound != nil {
+		return nil, errs.UserExist
 	}
 
 	staff, err := service.repo.Save(ctx.Request.Context(), &model)
