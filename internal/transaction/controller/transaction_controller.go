@@ -54,19 +54,6 @@ func (c *transactionController) Checkout(ctx *gin.Context) {
 		return
 	}
 
-	// err = c.Service.Create(reqBody)
-	// if err != nil {
-	// 	// if errors.Is(err, errs.UserExist) {
-	// 	// 	c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
-	// 	// 	return
-	// 	// }
-	// 	// if err.Error() == "invalid phone number" {
-	// 	// 	c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
-	// 	// 	return
-	// 	// }
-	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	// 	return
-	// }
 	ctx.Status(http.StatusOK)
 	return
 }
