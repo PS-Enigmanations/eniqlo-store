@@ -83,6 +83,13 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 				return
 			}
 
+			if productExists.Stock <= detail.Quantity {
+				result <- util.Result[interface{}]{
+					Error: productErrs.StockIsNotEnough,
+				}
+				return
+			}
+
 			total += int(productExists.Price * float64(detail.Quantity))
 		}
 
