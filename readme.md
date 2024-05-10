@@ -70,20 +70,16 @@ migrate -path db/migrations -database "postgres://postgres:postgres@0.0.0.0:5430
 **4. Running API:**
 
 ```sh
-docker-compose up --build api
+export DB_HOST=host.docker.internal docker-compose up --build api
 ```
 
 Open http://localhost:8080
 
 ### Publishing Docker images:
 
-**1. Migrate database (for production, if needed)**
+> Migrate database first (for production, if needed)
 
-```sh
-docker-compose --env-file .env up --build migrate
-```
-
-**2. Push to the registry**
+**1. Push to the registry**
 
 ```sh
 export DOCKER_PASSWORD=<??> && bash ./docker-deploy.sh
