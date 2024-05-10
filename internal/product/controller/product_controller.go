@@ -11,6 +11,7 @@ import (
 
 type ProductController interface {
 	SearchProducts(ctx *gin.Context)
+	Index(ctx *gin.Context)
 }
 
 type productController struct {
@@ -19,6 +20,26 @@ type productController struct {
 
 func NewProductController(svc service.ProductService) ProductController {
 	return &productController{Service: svc}
+}
+
+func (c *productController) Index(ctx *gin.Context) {
+	var reqQueryParams request.SearchProductQueryParams
+	if err := ctx.ShouldBindQuery(&reqQueryParams); err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	products := <-c.Service.GetProducts(&reqQueryParams)
+	if products.Error != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, products.Error)
+		return
+	}
+
+	// Mapping data from service to response
+	productShows := response.ToProductShows(products.Result)
+	productMappedResults := response.ProductToSearchProductsResponse(productShows)
+
+	ctx.JSON(http.StatusOK, productMappedResults)
 }
 
 func (c *productController) SearchProducts(ctx *gin.Context) {
@@ -39,5 +60,4 @@ func (c *productController) SearchProducts(ctx *gin.Context) {
 	productMappedResults := response.ProductToSearchProductsResponse(productShows)
 
 	ctx.JSON(http.StatusOK, productMappedResults)
-	return
 }

@@ -56,6 +56,12 @@ func (db *database) SearchProducts(ctx context.Context, params *request.SearchPr
 		where = append(where, fmt.Sprintf(`"is_available" = $%d`, len(args)))
 	}
 
+	// ID
+	if params.Id != "" {
+		args = append(args, params.Id)
+		where = append(where, fmt.Sprintf(`p.id = $%d`, len(args)))
+	}
+
 	// Name
 	if params.Name != "" {
 		args = append(args, params.Name)

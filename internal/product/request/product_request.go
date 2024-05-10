@@ -1,6 +1,7 @@
 package request
 
 type SearchProductQueryParams struct {
+	Id          string `form:"id"`
 	Name        string `form:"name"`
 	Category    string `form:"category" validate:"oneof=Clothing Accessories Footwear Beverages"`
 	Sku         string `form:"sku"`

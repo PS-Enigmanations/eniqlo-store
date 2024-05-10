@@ -48,6 +48,7 @@ func (v *v1Router) Load(router *gin.Engine, m middleware.Middleware) {
 		// Product api endpoint
 		product := v1.Group("/product")
 		{
+			product.GET("/", m.Auth.MustAuthenticated(), v.Product.Controller.Index)
 			product.GET("/customer", m.Auth.MustAuthenticated(), v.Product.Controller.SearchProducts)
 
 			checkout := product.Group("/checkout")

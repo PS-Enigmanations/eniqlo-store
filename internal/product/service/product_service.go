@@ -12,6 +12,7 @@ import (
 
 type ProductService interface {
 	SearchProducts(p *request.SearchProductQueryParams) <-chan util.Result[[]*product.Product]
+	GetProducts(p *request.SearchProductQueryParams) <-chan util.Result[[]*product.Product]
 }
 
 type ProductDependency struct {
@@ -38,6 +39,28 @@ func (svc *productService) SearchProducts(p *request.SearchProductQueryParams) <
 	result := make(chan util.Result[[]*product.Product])
 	go func() {
 		products, err := repo.Product.SearchProducts(svc.context, p, true)
+		if err != nil {
+			result <- util.Result[[]*product.Product]{
+				Error: err,
+			}
+			return
+		}
+
+		result <- util.Result[[]*product.Product]{
+			Result: products,
+		}
+		close(result)
+	}()
+
+	return result
+}
+
+func (svc *productService) GetProducts(p *request.SearchProductQueryParams) <-chan util.Result[[]*product.Product] {
+	repo := svc.repo
+
+	result := make(chan util.Result[[]*product.Product])
+	go func() {
+		products, err := repo.Product.SearchProducts(svc.context, p, false)
 		if err != nil {
 			result <- util.Result[[]*product.Product]{
 				Error: err,
