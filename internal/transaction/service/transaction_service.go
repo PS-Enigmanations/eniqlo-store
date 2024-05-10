@@ -13,7 +13,6 @@ import (
 	"enigmanations/eniqlo-store/internal/transaction/errs"
 	"enigmanations/eniqlo-store/pkg/validate"
 	"enigmanations/eniqlo-store/util"
-	// "fmt"
 )
 
 type TransactionService interface {
@@ -90,6 +89,14 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 		if total > p.Paid {
 			result <- util.Result[interface{}]{
 				Error: errs.PaidIsNotEnough,
+			}
+			return
+		}
+
+		validChange := p.Paid - total
+		if validChange != p.Change {
+			result <- util.Result[interface{}]{
+				Error: errs.ChangeIsNotRight,
 			}
 			return
 		}
