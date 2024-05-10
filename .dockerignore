@@ -1,0 +1,36 @@
+.babel_cache
+docs/*
+target/*
+.circleci
+.cpcache
+.devcontainer
+.github
+.husky
+.github
+.vscode
+hooks/*
+test/*
+test_config/*
+test_modules/*
+test_resources/*
+node_modules
+
+*.db
+
+Dockerfile
+.dockerignore
+
+guide/*
+
+# Project
+FAQ.md
+README.md
+LICENSE
+.gitignore
+.travis.yml
+CONTRIBUTING.md
+MIGRATIONS.md
+docker-deploy.sh
+
+# Golang
+testing

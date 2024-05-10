@@ -2,3 +2,8 @@
 main_enigmanations
 tmp
 .DS_Store
+.env.docker
+
+# scp
+*.key
+*.ssh

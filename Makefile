@@ -1,17 +1,11 @@
 -include .env
 
-ADDR := localhost:8000
+ADDR := localhost:8080
 PROJECTNAME := $(shell basename "$(PWD)")
 DATABASE_URL := "postgres://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?${DB_PARAMS}"
 
-# Make is verbose in Linux. Make it silent.
-MAKEFLAGS += --silent
-
 ## install: Install missing dependencies. Runs `go get` internally. e.g; make install get=github.com/foo/bar
 install: go-get
-
-setup:
-	go install github.com/cosmtrek/air@latest
 
 kill:
 	lsof -t -i tcp:8080 | xargs kill -9
@@ -36,7 +30,7 @@ up:
 
 ## up: run docker-compose up with production environment.
 up-prod:
-	JWT_SECRET=a-very-secretive-secret-key ./main_enigmanations
+	ENV=production JWT_SECRET=a-very-secretive-secret-key ./main_enigmanations
 
 ## run golang-migrate up
 migrateup:

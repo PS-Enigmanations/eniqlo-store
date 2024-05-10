@@ -43,6 +43,67 @@ go mod download
 make dev
 ```
 
+## Docker:
+
+### Running on your local machine:
+
+**1. Create Network**
+
+```sh
+# Create a network, which allows containers to communicate
+# with each other, by using their container name as a hostname
+docker network create app_network
+```
+
+**2. Start a Postgres instance**
+
+```sh
+docker-compose up --build postgres
+```
+
+**3. Migrate database**
+
+```sh
+migrate -path db/migrations -database "postgres://postgres:postgres@0.0.0.0:5430/eniqlo-store?sslmode=disable" up
+```
+
+**4. Running API**
+
+```sh
+export DB_HOST=host.docker.internal && docker-compose up --build api
+```
+
+Open http://localhost:8080
+
+### Publishing Docker images:
+
+> Migrate database first (for production, if needed)
+
+**1. Push to the registry**
+
+```sh
+export DOCKER_PASSWORD="" && bash ./docker-deploy.sh
+```
+
+### Run from registry:
+
+1. Pull from registry https://hub.docker.com/repository/docker/natserract/enigmanations-inventory
+
+```sh
+docker pull natserract/enigmanations-inventory:latest
+```
+
+2. Run
+
+```sh
+docker run -it --rm --network app_network -p 8080:8080 \
+-e ENV=production \
+-e DB_HOST=host.docker.internal \
+-e DB_USERNAME=postgres \
+-e DB_PASSWORD=postgres \
+-e DB_NAME=eniqlo-store natserract/enigmanations-inventory
+```
+
 ### API:
 
 - [x] http://localhost:8080/v1/staff/register
