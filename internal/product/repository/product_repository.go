@@ -14,6 +14,8 @@ import (
 
 type ProductRepository interface {
 	SearchProducts(ctx context.Context, params *request.SearchProductQueryParams, alwaysAvailable bool) ([]*product.Product, error)
+	SaveProduct(ctx context.Context, p *product.Product) (*product.Product, error)
+	DeleteProduct(ctx context.Context, id string) error
 }
 
 type database struct {
@@ -54,6 +56,12 @@ func (db *database) SearchProducts(ctx context.Context, params *request.SearchPr
 	if alwaysAvailable {
 		args = append(args, true)
 		where = append(where, fmt.Sprintf(`"is_available" = $%d`, len(args)))
+	}
+
+	// ID
+	if params.Id != "" {
+		args = append(args, params.Id)
+		where = append(where, fmt.Sprintf(`p.id = $%d`, len(args)))
 	}
 
 	// Name
@@ -184,4 +192,83 @@ func (db *database) SearchProducts(ctx context.Context, params *request.SearchPr
 	}
 
 	return products, nil
+}
+
+func (db *database) SaveProduct(ctx context.Context, p *product.Product) (*product.Product, error) {
+	sql := `
+		INSERT INTO products (
+			id,
+			name,
+			sku,
+			category,
+			image_url,
+			notes,
+			price,
+			stock,
+			location,
+			is_available,
+			created_at,
+			updated_at
+		) VALUES (
+			$1,
+			$2,
+			$3,
+			$4,
+			$5,
+			$6,
+			$7,
+			$8,
+			$9,
+			$10,
+			$11,
+			now()
+		) ON CONFLICT (id) DO UPDATE SET
+			name = EXCLUDED.name,
+			sku = EXCLUDED.sku,
+			category = EXCLUDED.category,
+			image_url = EXCLUDED.image_url,
+			notes = EXCLUDED.notes,
+			price = EXCLUDED.price,
+			stock = EXCLUDED.stock,
+			location = EXCLUDED.location,
+			is_available = EXCLUDED.is_available,
+			updated_at = EXCLUDED.updated_at
+		RETURNING id, created_at
+	`
+	args := []interface{}{
+		p.Id,
+		p.Name,
+		p.Sku,
+		p.Category,
+		p.ImageUrl,
+		p.Notes,
+		p.Price,
+		p.Stock,
+		p.Location,
+		p.IsAvailable,
+		p.CreatedAt,
+	}
+
+	err := db.pool.QueryRow(ctx, sql, args...).Scan(&p.Id, &p.CreatedAt)
+	if err != nil {
+		return p, err
+	}
+
+	return p, nil
+}
+
+func (db *database) DeleteProduct(ctx context.Context, id string) error {
+	sql := `
+		UPDATE products
+		SET
+			deleted_at = now()
+		WHERE
+			id = $1
+	`
+	_, err := db.pool.Exec(ctx, sql, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -18,11 +18,21 @@ type ProductShow struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type ProductCreateResponse struct {
+	Id        string    `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type ProductShows []ProductShow
 
 type SearchProductsResponse struct {
 	Message string       `json:"message"`
 	Data    ProductShows `json:"data"`
+}
+
+type CreateProductResponse struct {
+	Message string                `json:"message"`
+	Data    ProductCreateResponse `json:"data"`
 }
 
 func ToProductShows(p []*product.Product) ProductShows {
@@ -50,5 +60,15 @@ func ProductToSearchProductsResponse(data ProductShows) *SearchProductsResponse 
 	return &SearchProductsResponse{
 		Message: SearchProductsSuccMessage,
 		Data:    data,
+	}
+}
+
+func ProductToProductCreateResponse(data *product.Product) *CreateProductResponse {
+	return &CreateProductResponse{
+		Message: "Successfully create product",
+		Data: ProductCreateResponse{
+			Id:        data.Id,
+			CreatedAt: data.CreatedAt,
+		},
 	}
 }
