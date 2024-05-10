@@ -10,7 +10,6 @@ import (
 	productRepository "enigmanations/eniqlo-store/internal/product/repository"
 	custErrs "enigmanations/eniqlo-store/internal/customer/errs"
 	productErrs "enigmanations/eniqlo-store/internal/product/errs"
-	"fmt"
 	"enigmanations/eniqlo-store/pkg/validate"
 	"enigmanations/eniqlo-store/util"
 )
