@@ -5,7 +5,9 @@ import (
 	"enigmanations/eniqlo-store/internal/product"
 	"enigmanations/eniqlo-store/internal/product/repository"
 	"enigmanations/eniqlo-store/internal/product/request"
+	"enigmanations/eniqlo-store/pkg/uuid"
 	"enigmanations/eniqlo-store/util"
+	"strconv"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -13,6 +15,7 @@ import (
 type ProductService interface {
 	SearchProducts(p *request.SearchProductQueryParams) <-chan util.Result[[]*product.Product]
 	GetProducts(p *request.SearchProductQueryParams) <-chan util.Result[[]*product.Product]
+	SaveProduct(p *request.ProductCreateRequest) (*product.Product, error)
 }
 
 type ProductDependency struct {
@@ -75,4 +78,39 @@ func (svc *productService) GetProducts(p *request.SearchProductQueryParams) <-ch
 	}()
 
 	return result
+}
+
+func (svc *productService) SaveProduct(p *request.ProductCreateRequest) (*product.Product, error) {
+	repo := svc.repo
+
+	price, err := strconv.ParseFloat(p.Price, 64)
+	if err != nil {
+		return nil, err
+	}
+	stock, err := strconv.ParseInt(p.Stock, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	productId := uuid.New()
+
+	product := &product.Product{
+		Id:          productId,
+		Name:        p.Name,
+		Sku:         p.Sku,
+		Category:    product.Category(p.Category),
+		ImageUrl:    p.ImageUrl,
+		Notes:       p.Notes,
+		Price:       price,
+		Stock:       int(stock),
+		Location:    p.Location,
+		IsAvailable: p.IsAvailable == "true",
+	}
+
+	product, err = repo.Product.SaveProduct(svc.context, product)
+	if err != nil {
+		return nil, err
+	}
+
+	return product, nil
 }

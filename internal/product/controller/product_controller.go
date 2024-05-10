@@ -12,6 +12,7 @@ import (
 type ProductController interface {
 	SearchProducts(ctx *gin.Context)
 	Index(ctx *gin.Context)
+	CreateProduct(ctx *gin.Context)
 }
 
 type productController struct {
@@ -60,4 +61,24 @@ func (c *productController) SearchProducts(ctx *gin.Context) {
 	productMappedResults := response.ProductToSearchProductsResponse(productShows)
 
 	ctx.JSON(http.StatusOK, productMappedResults)
+}
+
+func (c *productController) CreateProduct(ctx *gin.Context) {
+	var reqBody request.ProductCreateRequest
+
+	if err := ctx.ShouldBindJSON(&reqBody); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	// send data to service layer to further process (create record)
+	productCreated, err := c.Service.SaveProduct(&reqBody)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+
+	}
+
+	// Mapping data from service to response
+	productCreatedMappedResult := response.ProductToProductCreateResponse(productCreated)
+	ctx.JSON(http.StatusCreated, productCreatedMappedResult)
 }
