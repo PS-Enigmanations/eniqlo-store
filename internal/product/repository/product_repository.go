@@ -277,7 +277,7 @@ func (db *database) DeleteProduct(ctx context.Context, id string) error {
 
 func (db *database) FindById(ctx context.Context, id string) (*product.Product, error) {
 	const sql = `
-		SELECT id, price, stock FROM products WHERE id = $1 LIMIT 1;
+		SELECT id, price, stock, is_available FROM products WHERE id = $1 LIMIT 1;
 	`
 	row := db.pool.QueryRow(ctx, sql, id)
 	c := new(product.Product)
@@ -285,6 +285,7 @@ func (db *database) FindById(ctx context.Context, id string) (*product.Product, 
 		&c.Id,
 		&c.Price,
 		&c.Stock,
+		&c.IsAvailable,
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {

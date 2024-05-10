@@ -4,6 +4,7 @@ import (
 	"enigmanations/eniqlo-store/internal/transaction/service"
 	"enigmanations/eniqlo-store/internal/transaction/request"
 	"enigmanations/eniqlo-store/internal/transaction/response"
+	"enigmanations/eniqlo-store/internal/transaction/errs"
 	custErrs "enigmanations/eniqlo-store/internal/customer/errs"
 	productErrs "enigmanations/eniqlo-store/internal/product/errs"
 	"github.com/gin-gonic/gin"
@@ -50,6 +51,9 @@ func (c *transactionController) Checkout(ctx *gin.Context) {
 			break
 		case errors.Is(checkoutCreated.Error, productErrs.ProductIsNotExists):
 			ctx.AbortWithError(http.StatusNotFound, checkoutCreated.Error)
+			break
+		case errors.Is(checkoutCreated.Error, errs.PaidIsNotEnough):
+			ctx.AbortWithError(http.StatusBadRequest, checkoutCreated.Error)
 			break
 		default:
 			ctx.AbortWithError(http.StatusInternalServerError, checkoutCreated.Error)
