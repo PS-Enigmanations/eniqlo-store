@@ -5,7 +5,7 @@ import (
 	"enigmanations/eniqlo-store/internal/product"
 	"enigmanations/eniqlo-store/internal/transaction"
 	"enigmanations/eniqlo-store/internal/product/request"
-	"enigmanations/eniqlo-store/util"
+	"enigmanations/eniqlo-store/pkg/validate"
 	"fmt"
 	"strconv"
 	"strings"
@@ -80,7 +80,7 @@ func (db *database) SearchProducts(ctx context.Context, params *request.SearchPr
 	}
 	// Category
 	if params.Category != "" {
-		if product.IsHasCategory(params.Category) {
+		if product.HasCategory(params.Category) {
 			args = append(args, params.Category)
 			where = append(where, fmt.Sprintf(`"category" ilike $%d`, len(args)))
 		}
@@ -100,7 +100,7 @@ func (db *database) SearchProducts(ctx context.Context, params *request.SearchPr
 			where = append(where, fmt.Sprintf(`"stock" = $%d`, len(args)))
 		}
 	}
-	if params.IsAvailable != "" && util.IsBoolFromStr(params.IsAvailable) && !alwaysAvailable {
+	if params.IsAvailable != "" && validate.IsStrBool(params.IsAvailable) && !alwaysAvailable {
 		isAvailable, err := strconv.ParseBool(params.IsAvailable)
 		if nil != err {
 			return nil, err
@@ -119,18 +119,18 @@ func (db *database) SearchProducts(ctx context.Context, params *request.SearchPr
 		sql += w
 	}
 
-	// Order by will only execute first operation at a time,
+	// Order by will only execute first at a time,
 	// Apply based on latest order by
 	//
 	// Order by price
-	if params.Price != "" && util.IsSortType(params.Price) {
+	if params.Price != "" && validate.IsStrSortType(params.Price) {
 		value := fmt.Sprintf("price %s", params.Price)
 
 		order = []string{}
 		order = append(order, value)
 	}
 	// Order by created at
-	if params.CreatedAt != "" && util.IsSortType(params.CreatedAt) {
+	if params.CreatedAt != "" && validate.IsStrSortType(params.CreatedAt) {
 		value := fmt.Sprintf("created_at %s", params.CreatedAt)
 		order = []string{}
 		order = append(order, value)
