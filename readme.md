@@ -102,7 +102,16 @@ docker pull natserract/enigmanations-inventory:latest
 **2. Run**
 
 ```sh
-docker run -it --rm --network app_network -p 8080:8080 \
+# Create a network, which allows containers to communicate
+# with each other, by using their container name as a hostname
+docker network create app_network
+
+# Using env file
+docker run -it --rm --network app_network \
+    --env-file .env natserract/enigmanations-inventory
+
+# Using env variable exported
+docker run -it --rm --network app_network \
     -e ENV=production \
     -e DB_HOST=host.docker.internal \
     -e DB_USERNAME=postgres \
