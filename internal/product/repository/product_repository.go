@@ -117,7 +117,7 @@ func (db *database) SearchProducts(ctx context.Context, params *request.SearchPr
 		sql += w
 	}
 
-	// Order by will only execute first operation at a time,
+	// Order by will only execute first at a time,
 	// Apply based on latest order by
 	//
 	// Order by price
