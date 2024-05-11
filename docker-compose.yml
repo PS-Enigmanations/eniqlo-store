@@ -23,11 +23,13 @@ services:
         "-path",
         "/migrations",
         "-database",
-        "postgres://postgres:postgres@0.0.0.0:5430/eniqlo-store?sslmode=disable",
+        "postgres://${DB_USERNAME}:${DB_PASSWORD}@host.docker.internal:5430/${DB_NAME}?sslmode=disable",
         "up",
       ]
     depends_on:
       - postgres
+    networks:
+      - app_network
 
   api:
     container_name: enigmanations_api_container

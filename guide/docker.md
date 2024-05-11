@@ -24,7 +24,7 @@ docker inspect <CONTAINER_NAME>
 ## Create database
 
 ```sh
-docker exec -it enigmanations_postgres_container psql -h localhost -p 5432 -U postgres -c 'create database "eniqlo-store"'
+docker exec -it enigmanations_postgres_container psql -h localhost -p 5430 -U postgres -c 'create database "eniqlo-store"'
 ```
 
 ## Migrate local database to docker
