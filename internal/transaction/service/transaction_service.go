@@ -59,6 +59,7 @@ func (svc *transactionService) readProductDetailsBatch(
 
 	var totalAccumulated = 0
 	var orderItems []transaction.ProductDetail
+	var errs error
 
 	// Create batches chunks
 	batchChunksCh := make(chan []request.ProductDetail)
@@ -76,24 +77,32 @@ func (svc *transactionService) readProductDetailsBatch(
 		// Listen on `batchChunksCh` to see if there is any resource pending in it.
 		for chunks := range batchChunksCh {
 			for _, item := range chunks {
+				// When it releases the lock, another goroutine can acquire it
+				// and continue working with the slice.
+				defer mutex.Unlock() // <- defers the execution until the func returns (will release the lock)
+
 				// When a goroutine acquires the lock, it can safely add items
 				// to the slice without worrying about race conditions.
 				mutex.Lock()
 
 				isValidateUuid := validate.IsValidUUID(item.ProductId)
 				if !isValidateUuid {
-					return productErrs.ProductIsNotExists
+					errs = productErrs.ProductIsNotExists
+					return nil
 				}
 
 				productExists, err := repo.Product.FindById(svc.context, item.ProductId)
 				if err != nil {
-					return err
+					errs = err
+					return nil
 				}
 				if productExists == nil {
-					return productErrs.ProductIsNotExists
+					errs = productErrs.ProductIsNotExists
+					return nil
 				}
 				if productExists.Stock < item.Quantity {
-					return productErrs.StockIsNotEnough
+					errs = productErrs.StockIsNotEnough
+					return nil
 				}
 
 				orderItems = append(orderItems, transaction.ProductDetail{
@@ -102,10 +111,6 @@ func (svc *transactionService) readProductDetailsBatch(
 				})
 
 				totalAccumulated += int(productExists.Price * float64(item.Quantity))
-
-				// When it releases the lock, another goroutine can acquire it
-				// and continue working with the slice.
-				mutex.Unlock()
 			}
 		}
 
@@ -131,6 +136,12 @@ func (svc *transactionService) readProductDetailsBatch(
 	if err := g.Wait(); err != nil {
 		return util.Result[*productDetailsBatchRet]{
 			Error: err,
+		}
+	}
+
+	if errs != nil {
+		return util.Result[*productDetailsBatchRet]{
+			Error: errs,
 		}
 	}
 
@@ -165,6 +176,10 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 		details := svc.readProductDetailsBatch(p, 2)
 		if details.Error != nil {
 			fmt.Printf("Result error %v %s", details.Error, "\n")
+			result <- util.ResultErr{
+				Error: details.Error,
+			}
+			return
 		}
 
 		if float64(details.Result.totalOrder) > p.Paid {
