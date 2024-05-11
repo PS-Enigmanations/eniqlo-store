@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -63,15 +64,26 @@ func (db *Database) SaveDetails(ctx context.Context, models []transaction.Produc
 		("id", "transaction_id", "product_id", "quantity")
 		VALUES ($1, $2, $3, $4);`
 
+	batch := &pgx.Batch{}
 	for _, model := range models {
 		id := uuid.New()
-		_, err := db.pool.Exec(ctx, sql, id, transactionId, model.ProductId, model.Quantity)
+		batch.Queue(sql, id, transactionId, model.ProductId, model.Quantity)
+	}
+
+	results := db.pool.SendBatch(ctx, batch)
+	defer results.Close()
+
+	for range models {
+		r, err := results.Exec()
 		if err != nil {
 			return fmt.Errorf("Save Transaction Detail %w", err)
 		}
+		if r.RowsAffected() != 1 {
+			return fmt.Errorf("ct.RowsAffected() => %v, want %v", r.RowsAffected(), 1)
+		}
 	}
 
-	return nil
+	return results.Close()
 }
 
 func (db *Database) GetAllByParams(ctx context.Context, params *request.TransactionGetAllQueryParams) ([]*transaction.Transaction, error) {
