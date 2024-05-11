@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"enigmanations/eniqlo-store/internal/transaction"
 	"enigmanations/eniqlo-store/internal/transaction/request"
+	"enigmanations/eniqlo-store/pkg/uuid"
 	"enigmanations/eniqlo-store/pkg/validate"
 	"fmt"
 	"strings"
@@ -13,7 +14,8 @@ import (
 )
 
 type TransactionRepository interface {
-	Save(ctx context.Context, model transaction.Transaction) (*transaction.Transaction, error)
+	Save(ctx context.Context, model transaction.Transaction, total float64) (*transaction.Transaction, error)
+	SaveDetails(ctx context.Context, models []transaction.ProductDetail, transactionId string) error
 	GetAllByParams(ctx context.Context, params *request.TransactionGetAllQueryParams) ([]*transaction.Transaction, error)
 }
 
@@ -27,8 +29,49 @@ func NewTransactionRepository(pool *pgxpool.Pool) TransactionRepository {
 	}
 }
 
-func (db *Database) Save(ctx context.Context, model transaction.Transaction) (*transaction.Transaction, error) {
-	return nil, nil
+func (db *Database) Save(ctx context.Context, model transaction.Transaction, total float64) (*transaction.Transaction, error) {
+	const sql = `INSERT into transactions
+		("id", "customer_id", "total", "paid", "change")
+		VALUES ($1, $2, $3, $4, $5)
+		RETURNING id;`
+
+	row := db.pool.QueryRow(
+		ctx,
+		sql,
+		model.TransactionId,
+		model.CustomerId,
+		total,
+		model.Paid,
+		model.Change,
+	)
+
+	c := new(transaction.Transaction)
+
+	err := row.Scan(
+		&c.TransactionId,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("Save %w", err)
+	}
+
+	return c, nil
+}
+
+func (db *Database) SaveDetails(ctx context.Context, models []transaction.ProductDetail, transactionId string) error {
+	const sql = `INSERT into transaction_details
+		("id", "transaction_id", "product_id", "quantity")
+		VALUES ($1, $2, $3, $4);`
+
+	for _, model := range models {
+		id := uuid.New()
+		_, err := db.pool.Exec(ctx, sql, id, transactionId, model.ProductId, model.Quantity)
+		if err != nil {
+			return fmt.Errorf("Save Transaction Detail %w", err)
+		}
+	}
+
+	return nil
 }
 
 func (db *Database) GetAllByParams(ctx context.Context, params *request.TransactionGetAllQueryParams) ([]*transaction.Transaction, error) {

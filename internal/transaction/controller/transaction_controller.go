@@ -38,13 +38,13 @@ func (c *transactionController) Checkout(ctx *gin.Context) {
 	validate := validator.New()
 	err := validate.Struct(reqBody)
 	if err != nil {
-		fmt.Println(err)
 		ctx.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
 	checkoutCreated := <-c.Service.Create(&reqBody)
 	if checkoutCreated.Error != nil {
+		fmt.Println(checkoutCreated.Error)
 		switch {
 		case errors.Is(checkoutCreated.Error, custErrs.CustomerIsNotExists):
 			ctx.AbortWithError(http.StatusNotFound, checkoutCreated.Error)
@@ -59,7 +59,6 @@ func (c *transactionController) Checkout(ctx *gin.Context) {
 			ctx.AbortWithError(http.StatusBadRequest, checkoutCreated.Error)
 			break
 		case errors.Is(checkoutCreated.Error, productErrs.StockIsNotEnough):
-			
 			ctx.AbortWithError(http.StatusBadRequest, checkoutCreated.Error)
 			break
 		default:

@@ -1,15 +1,15 @@
 package request
 
 type ProductDetail struct {
-	ProductId string `json:"productId"`
+	ProductId string `json:"productId" validate:"required"`
 	Quantity  int    `json:"quantity" validate:"required,min=1"`
 }
 
 type CheckoutRequest struct {
-	CustomerId     string           `json:"customerId"`
+	CustomerId     string           `json:"customerId" validate:"required"`
 	ProductDetails []ProductDetail 	`json:"productDetails" validate:"required,min=1,dive"`
-	Paid           int              `json:"paid" validate:"required,min=1"`
-	Change         int              `json:"change" validate:"min=0"`
+	Paid           float64          `json:"paid" validate:"required,min=1"`
+	Change         float64          `json:"change" validate:"min=0"`
 }
 
 type TransactionGetAllQueryParams struct {
