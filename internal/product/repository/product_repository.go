@@ -6,7 +6,9 @@ import (
 	"enigmanations/eniqlo-store/internal/product/request"
 	"enigmanations/eniqlo-store/internal/transaction"
 	"enigmanations/eniqlo-store/pkg/validate"
+	"errors"
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
 
@@ -289,26 +291,26 @@ func (db *database) DeleteProduct(ctx context.Context, id string) error {
 }
 
 func (db *database) FindById(ctx context.Context, id string) (*product.Product, error) {
+	var p product.Product
+
 	const sql = `
 		SELECT id, price, stock, is_available FROM products WHERE id = $1 LIMIT 1;
 	`
-	row := db.pool.QueryRow(ctx, sql, id)
-	c := new(product.Product)
-	err := row.Scan(
-		&c.Id,
-		&c.Price,
-		&c.Stock,
-		&c.IsAvailable,
-	)
-
+	rows, err := db.pool.Query(ctx, sql, id)
+	if err == nil {
+		p, err = pgx.CollectOneRow(rows, pgx.RowToStructByPos[product.Product])
+	}
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
 	if err != nil {
-		if err == pgx.ErrNoRows {
-			return nil, nil
-		}
-		return nil, err
+		slog.Error("cannot get product from database",
+			slog.Any("id", id),
+			slog.Any("error", err))
+		return nil, errors.New("cannot get product from database")
 	}
 
-	return c, nil
+	return &p, nil
 }
 
 func (db *database) UpdateStocks(ctx context.Context, details []transaction.ProductDetail) error {
