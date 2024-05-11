@@ -9,7 +9,7 @@ type CheckoutRequest struct {
 	CustomerId     string           `json:"customerId" validate:"required"`
 	ProductDetails []ProductDetail 	`json:"productDetails" validate:"required,min=1,dive"`
 	Paid           float64          `json:"paid" validate:"required,min=1"`
-	Change         float64          `json:"change" validate:"min=0"`
+	Change         *float64          `json:"change" validate:"min=0"`
 }
 
 type TransactionGetAllQueryParams struct {
