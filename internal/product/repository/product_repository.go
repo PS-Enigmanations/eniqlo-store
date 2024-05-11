@@ -17,7 +17,7 @@ import (
 )
 
 type ProductRepository interface {
-	FindById(ctx context.Context, id string) (*product.Product, error)
+	FindById(ctx context.Context, id string) (*findByIdRow, error)
 	SearchProducts(ctx context.Context, params *request.SearchProductQueryParams, alwaysAvailable bool) ([]*product.Product, error)
 	SaveProduct(ctx context.Context, p *product.Product) (*product.Product, error)
 	DeleteProduct(ctx context.Context, id string) error
@@ -290,15 +290,22 @@ func (db *database) DeleteProduct(ctx context.Context, id string) error {
 	return nil
 }
 
-func (db *database) FindById(ctx context.Context, id string) (*product.Product, error) {
-	var p product.Product
+type findByIdRow struct {
+	Id          string
+	Price       float64
+	Stock       int
+	IsAvailable bool
+}
+
+func (db *database) FindById(ctx context.Context, id string) (*findByIdRow, error) {
+	var p findByIdRow
 
 	const sql = `
 		SELECT id, price, stock, is_available FROM products WHERE id = $1 LIMIT 1;
 	`
 	rows, err := db.pool.Query(ctx, sql, id)
 	if err == nil {
-		p, err = pgx.CollectOneRow(rows, pgx.RowToStructByPos[product.Product])
+		p, err = pgx.CollectOneRow(rows, pgx.RowToStructByPos[findByIdRow])
 	}
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil

@@ -1,17 +1,18 @@
 package controller
 
 import (
-	"enigmanations/eniqlo-store/internal/transaction/service"
-	"enigmanations/eniqlo-store/internal/transaction/request"
-	"enigmanations/eniqlo-store/internal/transaction/response"
-	"enigmanations/eniqlo-store/internal/transaction/errs"
 	custErrs "enigmanations/eniqlo-store/internal/customer/errs"
 	productErrs "enigmanations/eniqlo-store/internal/product/errs"
-	"github.com/gin-gonic/gin"
-	"net/http"
-	"fmt"
-	"github.com/go-playground/validator/v10"
+	"enigmanations/eniqlo-store/internal/transaction/errs"
+	"enigmanations/eniqlo-store/internal/transaction/request"
+	"enigmanations/eniqlo-store/internal/transaction/response"
+	"enigmanations/eniqlo-store/internal/transaction/service"
 	"errors"
+	"fmt"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type TransactionController interface {
