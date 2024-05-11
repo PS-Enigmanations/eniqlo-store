@@ -13,6 +13,7 @@ services:
       - 5430:5432
     networks:
       - app_network
+    platform: darwin/arm64, windows/amd64, linux/amd64
 
   api:
     container_name: enigmanations_api_container
@@ -38,6 +39,7 @@ services:
       - postgres
     networks:
       - app_network
+    platform: darwin/arm64, windows/amd64, linux/amd64
 
 volumes:
   api:
