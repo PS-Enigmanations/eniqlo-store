@@ -92,13 +92,12 @@ func (c *productController) CreateProduct(ctx *gin.Context) {
 
 func (c *productController) UpdateProduct(ctx *gin.Context) {
 	var reqBody request.ProductRequest
+	reqBody.Id = ctx.Param("id")
 
 	if err := ctx.ShouldBindJSON(&reqBody); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	reqBody.Id = ctx.Param("id")
 
 	validate := validator.New()
 	err := validate.Struct(&reqBody)

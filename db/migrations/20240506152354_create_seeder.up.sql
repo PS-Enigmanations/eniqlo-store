@@ -8,16 +8,16 @@ VALUES
 -- PRODUCT SEEDER
 INSERT INTO "public"."products" ("id", "name", "sku", "category", "image_url", "notes", "price", "stock", "location", "is_available", "created_at", "updated_at", "deleted_at")
 VALUES
-('0f8fad5b-d9cb-469f-a165-70867728950e', 'Blue T-Shirt', 'TS001', 'Clothing', 'https://example.com/image1.jpg', 'Comfortable cotton material', 15.99, 50, 'Warehouse A', true, NOW(), NULL, NULL),
-('7c9e6679-7425-40de-944b-e07fc1f90ae7', 'Black Leather Belt', 'BLB002', 'Accessories', 'https://example.com/image2.jpg', 'Genuine leather, adjustable buckle', 29.99, 30, 'Warehouse B', true, NOW(), NULL, NULL),
-('8f14e45fceea167a5a36dedd4bea2543', 'Running Shoes', 'SH003', 'Footwear', 'https://example.com/image3.jpg', 'Breathable mesh, cushioned sole', 49.99, 100, 'Warehouse C', true, NOW(), NULL, NULL),
-('c9f0f895fb98ab9159f51fd0297e236d', 'Green Tea', 'GT004', 'Beverages', 'https://example.com/image4.jpg', 'Organic green tea leaves', 7.99, 200, 'Warehouse D', true, NOW(), NULL, NULL),
-('42343331-7dd2-4610-9893-491fa485745d', 'Red Hoodie', 'HD005', 'Clothing', 'https://example.com/image5.jpg', 'Warm and cozy, with a hood', 39.99, 20, 'Warehouse A', true, NOW(), NULL, NULL),
-('18a6c3c8-38bd-4227-bf08-0852ffc76c1b', 'Silver Necklace', 'NK006', 'Accessories', 'https://example.com/image6.jpg', 'Elegant silver necklace', 19.99, 40, 'Warehouse B', true, NOW(), NULL, NULL),
-('d37a7fb8-38e3-4427-b43f-1298daf56eff', 'Running Shorts', 'SH007', 'Clothing', 'https://example.com/image7.jpg', 'Lightweight and breathable', 24.99, 60, 'Warehouse C', true, NOW(), NULL, NULL),
-('062b7f43-f93f-4055-88ce-d2aadfed2acf', 'Coffee Mug', 'MG008', 'Accessories', 'https://example.com/image8.jpg', 'Durable ceramic mug', 9.99, 80, 'Warehouse D', true, NOW(), NULL, NULL),
-('ff6c0953-e4af-452c-95d9-0e5f019c284b', 'White Sneakers', 'SN009', 'Footwear', 'https://example.com/image9.jpg', 'Classic white sneakers', 59.99, 90, 'Warehouse A', true, NOW(), NULL, NULL),
-('f72554ef-ae1c-4103-a976-f5cd6f295f59', 'Chocolate Bar', 'CB010', 'Beverages', 'https://example.com/image10.jpg', 'Rich and creamy chocolate', 4.99, 150, 'Warehouse B', true, NOW(), NULL, NULL);
+('0f8fad5b-d9cb-469f-a165-70867728950e', 'Blue T-Shirt', 'TS001', 'Clothing', 'https://example.com/image1.jpg', 'Comfortable cotton material', 15.99, 50, 'Warehouse A', true, NOW() + INTERVAL '1 second', NULL, NULL),
+('7c9e6679-7425-40de-944b-e07fc1f90ae7', 'Black Leather Belt', 'BLB002', 'Accessories', 'https://example.com/image2.jpg', 'Genuine leather, adjustable buckle', 29.99, 30, 'Warehouse B', true, NOW() + INTERVAL '2 second', NULL, NULL),
+('8f14e45fceea167a5a36dedd4bea2543', 'Running Shoes', 'SH003', 'Footwear', 'https://example.com/image3.jpg', 'Breathable mesh, cushioned sole', 49.99, 100, 'Warehouse C', true, NOW() + INTERVAL '3 second', NULL, NULL),
+('c9f0f895fb98ab9159f51fd0297e236d', 'Green Tea', 'GT004', 'Beverages', 'https://example.com/image4.jpg', 'Organic green tea leaves', 7.99, 200, 'Warehouse D', true, NOW() + INTERVAL '4 second', NULL, NULL),
+('42343331-7dd2-4610-9893-491fa485745d', 'Red Hoodie', 'HD005', 'Clothing', 'https://example.com/image5.jpg', 'Warm and cozy, with a hood', 39.99, 20, 'Warehouse A', true, NOW() + INTERVAL '5 second', NULL, NULL),
+('18a6c3c8-38bd-4227-bf08-0852ffc76c1b', 'Silver Necklace', 'NK006', 'Accessories', 'https://example.com/image6.jpg', 'Elegant silver necklace', 19.99, 40, 'Warehouse B', true, NOW() + INTERVAL '6 second', NULL, NULL),
+('d37a7fb8-38e3-4427-b43f-1298daf56eff', 'Running Shorts', 'SH007', 'Clothing', 'https://example.com/image7.jpg', 'Lightweight and breathable', 24.99, 60, 'Warehouse C', true, NOW() + INTERVAL '7 second', NULL, NULL),
+('062b7f43-f93f-4055-88ce-d2aadfed2acf', 'Coffee Mug', 'MG008', 'Accessories', 'https://example.com/image8.jpg', 'Durable ceramic mug', 9.99, 80, 'Warehouse D', true, NOW() + INTERVAL '8 second', NULL, NULL),
+('ff6c0953-e4af-452c-95d9-0e5f019c284b', 'White Sneakers', 'SN009', 'Footwear', 'https://example.com/image9.jpg', 'Classic white sneakers', 59.99, 90, 'Warehouse A', true, NOW() + INTERVAL '9 second', NULL, NULL),
+('f72554ef-ae1c-4103-a976-f5cd6f295f59', 'Chocolate Bar', 'CB010', 'Beverages', 'https://example.com/image10.jpg', 'Rich and creamy chocolate', 4.99, 150, 'Warehouse B', true, NOW() + INTERVAL '10 second', NULL, NULL);
 
 -- CUSTOMER SEEDER
 INSERT INTO "public"."customers" ("id", "name", "phone_number", "created_at", "updated_at", "deleted_at")

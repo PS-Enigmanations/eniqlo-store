@@ -10,6 +10,7 @@ import (
 	"enigmanations/eniqlo-store/util"
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -87,9 +88,10 @@ func (svc *productService) SaveProduct(p *request.ProductRequest) (*product.Prod
 	repo := svc.repo
 
 	productId := uuid.New()
+	currentDateTime := time.Now()
 	if p.Id != "" {
 		productId = p.Id
-		findProduct, err := repo.Product.SearchProducts(svc.context, &request.SearchProductQueryParams{Id: productId}, true)
+		findProduct, err := repo.Product.SearchProducts(svc.context, &request.SearchProductQueryParams{Id: productId}, false)
 		if err != nil || len(findProduct) == 0 {
 			return nil, errs.ErrProductNotFound
 		}
@@ -116,6 +118,11 @@ func (svc *productService) SaveProduct(p *request.ProductRequest) (*product.Prod
 		Stock:       p.Stock,
 		Location:    p.Location,
 		IsAvailable: p.IsAvailable,
+	}
+	if p.Id != "" {
+		productModel.UpdatedAt = currentDateTime
+	} else {
+		productModel.CreatedAt = currentDateTime
 	}
 
 	product, err := repo.Product.SaveProduct(svc.context, productModel)

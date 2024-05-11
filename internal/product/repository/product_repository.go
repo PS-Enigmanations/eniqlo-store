@@ -127,9 +127,17 @@ func (db *database) SearchProducts(ctx context.Context, params *request.SearchPr
 		order = []string{}
 		order = append(order, value)
 	}
+
 	// Order by created at
 	if params.CreatedAt != "" && validate.IsStrSortType(params.CreatedAt) {
 		value := fmt.Sprintf("created_at %s", params.CreatedAt)
+		order = []string{}
+		order = append(order, value)
+	}
+
+	if params.CreatedAt == "" && params.Price == "" {
+		// Order by created at
+		value := "created_at DESC"
 		order = []string{}
 		order = append(order, value)
 	}
