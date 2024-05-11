@@ -90,16 +90,6 @@ func (svc *productService) SaveProduct(p *request.ProductRequest) <-chan util.Re
 	go func() {
 		productId := uuid.New()
 		currentDateTime := time.Now()
-		if p.Id != "" {
-			productId = p.Id
-			findProduct, err := repo.Product.SearchProducts(svc.context, &request.SearchProductQueryParams{Id: productId}, true)
-			if err != nil || len(findProduct) == 0 {
-				result <- util.Result[*product.Product]{
-					Error: errs.ErrProductNotFound,
-				}
-				return
-			}
-		}
 
 		for _, imageFormat := range product.ImageFormats {
 			if strings.HasSuffix(p.ImageUrl, imageFormat) {
@@ -109,6 +99,17 @@ func (svc *productService) SaveProduct(p *request.ProductRequest) <-chan util.Re
 			if imageFormat == product.ImageFormats[len(product.ImageFormats)-1] {
 				result <- util.Result[*product.Product]{
 					Error: errs.ErrImageUrlInvalid,
+				}
+				return
+			}
+		}
+
+		if p.Id != "" {
+			productId = p.Id
+			findProduct, err := repo.Product.SearchProducts(svc.context, &request.SearchProductQueryParams{Id: productId}, false)
+			if err != nil || len(findProduct) == 0 {
+				result <- util.Result[*product.Product]{
+					Error: errs.ErrProductNotFound,
 				}
 				return
 			}
@@ -153,7 +154,7 @@ func (svc *productService) SaveProduct(p *request.ProductRequest) <-chan util.Re
 func (svc *productService) DeleteProduct(id string) error {
 	repo := svc.repo
 
-	findProduct, err := repo.Product.SearchProducts(svc.context, &request.SearchProductQueryParams{Id: id}, true)
+	findProduct, err := repo.Product.SearchProducts(svc.context, &request.SearchProductQueryParams{Id: id}, false)
 	if err != nil || len(findProduct) == 0 {
 		return errs.ErrProductNotFound
 	}
