@@ -77,13 +77,13 @@ Open http://localhost:8080
 
 ### Publishing Docker images:
 
-1. Prepare database
+**1. Prepare database (if not exists)**
 
 ```sh
 docker exec -it enigmanations_postgres_container psql -h host.docker.internal -p 5430 -U postgres -c 'create database "eniqlo-store"'
 ```
 
-2. Run migration
+**2. Run migration**
 
 ```sh
 docker-compose up --build migrate
