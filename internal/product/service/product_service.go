@@ -123,7 +123,7 @@ func (svc *productService) SaveProduct(p *request.ProductRequest) <-chan util.Re
 			ImageUrl:    p.ImageUrl,
 			Notes:       p.Notes,
 			Price:       p.Price,
-			Stock:       p.Stock,
+			Stock:       *p.Stock,
 			Location:    p.Location,
 			IsAvailable: *p.IsAvailable,
 		}
