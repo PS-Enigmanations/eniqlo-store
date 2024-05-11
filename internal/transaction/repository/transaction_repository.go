@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"enigmanations/eniqlo-store/internal/transaction"
 	"enigmanations/eniqlo-store/internal/transaction/request"
-	"enigmanations/eniqlo-store/util"
+	"enigmanations/eniqlo-store/pkg/validate"
 	"fmt"
 	"strings"
 
@@ -69,7 +69,7 @@ func (db *Database) GetAllByParams(ctx context.Context, params *request.Transact
 	}
 
 	// Order by created at
-	if params.CreatedAt != "" && util.IsSortType(params.CreatedAt) {
+	if params.CreatedAt != "" && validate.IsStrSortType(params.CreatedAt) {
 		value := fmt.Sprintf("created_at %s", params.CreatedAt)
 		order = []string{}
 		order = append(order, value)
