@@ -46,7 +46,6 @@ func (c *productController) Index(ctx *gin.Context) {
 	productMappedResults := response.ProductToSearchProductsResponse(productShows)
 
 	ctx.JSON(http.StatusOK, productMappedResults)
-	return
 }
 
 func (c *productController) SearchProducts(ctx *gin.Context) {
@@ -106,19 +105,29 @@ func (c *productController) UpdateProduct(ctx *gin.Context) {
 	}
 
 	reqBody.Id = ctx.Param("id")
-	_, err := c.Service.SaveProduct(&reqBody)
+
+	validate := validator.New()
+	err := validate.Struct(&reqBody)
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	_, err = c.Service.SaveProduct(&reqBody)
 	if err != nil {
 		if err.Error() == errs.ErrProductNotFound.Error() {
 			ctx.AbortWithError(http.StatusNotFound, err)
+			return
+		}
+		if err.Error() == errs.ErrImageUrlInvalid.Error() {
+			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "Product updated successfully",
-	})
+	ctx.Status(http.StatusOK)
 }
 
 func (c *productController) DeleteProduct(ctx *gin.Context) {

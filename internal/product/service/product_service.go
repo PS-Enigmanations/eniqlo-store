@@ -9,6 +9,7 @@ import (
 	"enigmanations/eniqlo-store/pkg/uuid"
 	"enigmanations/eniqlo-store/util"
 	"errors"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -85,17 +86,26 @@ func (svc *productService) GetProducts(p *request.SearchProductQueryParams) <-ch
 func (svc *productService) SaveProduct(p *request.ProductRequest) (*product.Product, error) {
 	repo := svc.repo
 
-	findProduct, err := repo.Product.SearchProducts(svc.context, &request.SearchProductQueryParams{Id: p.Id}, true)
-	if err != nil || len(findProduct) == 0 {
-		return nil, errs.ErrProductNotFound
-	}
-
 	productId := uuid.New()
 	if p.Id != "" {
 		productId = p.Id
+		findProduct, err := repo.Product.SearchProducts(svc.context, &request.SearchProductQueryParams{Id: productId}, true)
+		if err != nil || len(findProduct) == 0 {
+			return nil, errs.ErrProductNotFound
+		}
 	}
 
-	product := &product.Product{
+	for _, imageFormat := range product.ImageFormats {
+		if strings.HasSuffix(p.ImageUrl, imageFormat) {
+			break
+		}
+
+		if imageFormat == product.ImageFormats[len(product.ImageFormats)-1] {
+			return nil, errs.ErrImageUrlInvalid
+		}
+	}
+
+	productModel := &product.Product{
 		Id:          productId,
 		Name:        p.Name,
 		Sku:         p.Sku,
@@ -108,7 +118,7 @@ func (svc *productService) SaveProduct(p *request.ProductRequest) (*product.Prod
 		IsAvailable: p.IsAvailable,
 	}
 
-	product, err = repo.Product.SaveProduct(svc.context, product)
+	product, err := repo.Product.SaveProduct(svc.context, productModel)
 	if err != nil {
 		return nil, err
 	}
