@@ -140,6 +140,9 @@ func (db *database) SearchProducts(ctx context.Context, params *request.SearchPr
 	if len(order) > 0 {
 		o := " ORDER BY " + strings.Join(order, ", ")
 		sql += o
+	} else {
+		o := " ORDER BY created_at desc"
+		sql += o
 	}
 
 	// Limit (default: 5)
