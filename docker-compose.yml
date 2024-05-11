@@ -15,6 +15,21 @@ services:
       - app_network
     platform: darwin/arm64, windows/amd64, linux/amd64
 
+  migrate:
+    image: migrate/migrate
+    volumes:
+      - ./db/migrations:/migrations
+    command:
+      [
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://postgres:postgres@0.0.0.0:5430/eniqlo-store?sslmode=disable",
+        "up",
+      ]
+    depends_on:
+      - postgres
+
   api:
     container_name: enigmanations_api_container
     tty: true
