@@ -2,12 +2,15 @@ package service
 
 import (
 	"context"
+	"enigmanations/eniqlo-store/internal/common/errs"
 	"enigmanations/eniqlo-store/internal/product"
 	"enigmanations/eniqlo-store/internal/product/repository"
 	"enigmanations/eniqlo-store/internal/product/request"
 	"enigmanations/eniqlo-store/pkg/uuid"
 	"enigmanations/eniqlo-store/util"
 	"errors"
+	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -85,11 +88,26 @@ func (svc *productService) SaveProduct(p *request.ProductRequest) (*product.Prod
 	repo := svc.repo
 
 	productId := uuid.New()
+	currentDateTime := time.Now()
 	if p.Id != "" {
 		productId = p.Id
+		findProduct, err := repo.Product.SearchProducts(svc.context, &request.SearchProductQueryParams{Id: productId}, false)
+		if err != nil || len(findProduct) == 0 {
+			return nil, errs.ErrProductNotFound
+		}
 	}
 
-	product := &product.Product{
+	for _, imageFormat := range product.ImageFormats {
+		if strings.HasSuffix(p.ImageUrl, imageFormat) {
+			break
+		}
+
+		if imageFormat == product.ImageFormats[len(product.ImageFormats)-1] {
+			return nil, errs.ErrImageUrlInvalid
+		}
+	}
+
+	productModel := &product.Product{
 		Id:          productId,
 		Name:        p.Name,
 		Sku:         p.Sku,
@@ -99,10 +117,15 @@ func (svc *productService) SaveProduct(p *request.ProductRequest) (*product.Prod
 		Price:       p.Price,
 		Stock:       p.Stock,
 		Location:    p.Location,
-		IsAvailable: p.IsAvailable,
+		IsAvailable: *p.IsAvailable,
+	}
+	if p.Id != "" {
+		productModel.UpdatedAt = currentDateTime
+	} else {
+		productModel.CreatedAt = currentDateTime
 	}
 
-	product, err := repo.Product.SaveProduct(svc.context, product)
+	product, err := repo.Product.SaveProduct(svc.context, productModel)
 	if err != nil {
 		return nil, err
 	}

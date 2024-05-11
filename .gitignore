@@ -3,6 +3,7 @@ main_enigmanations
 tmp
 .DS_Store
 .env.docker
+testcases
 
 # scp
 *.key

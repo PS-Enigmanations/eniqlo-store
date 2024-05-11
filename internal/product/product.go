@@ -32,6 +32,8 @@ const (
 	Beverages   Category = "Beverages"
 )
 
+var ImageFormats = []string{".jpg", ".jpeg", ".png", ".webp"}
+
 type CategoryItem struct {
 	Name   string
 	Search []string

@@ -16,14 +16,14 @@ type SearchProductQueryParams struct {
 }
 
 type ProductRequest struct {
-	Id          string `form:"id"`
-	Name        string `form:"name" binding:"required"`
-	Sku         string `form:"sku" binding:"required"`
-	Category    string `form:"category" binding:"oneof=Clothing Accessories Footwear Beverages"`
-	ImageUrl    string `form:"imageUrl" binding:"required,url"`
+	Id          string  `form:"id"`
+	Name        string  `form:"name" binding:"required"`
+	Sku         string  `form:"sku" binding:"required"`
+	Category    string  `form:"category" binding:"oneof=Clothing Accessories Footwear Beverages"`
+	ImageUrl    string  `form:"imageUrl" binding:"required,url"`
 	Notes       string  `form:"notes" binding:"required,min=1,max=200"`
 	Price       float64 `form:"price" binding:"required"`
 	Stock       int     `form:"stock" binding:"required,min=0,max=100000"`
-	Location    string `form:"location" binding:"required"`
-	IsAvailable bool `json:"isAvailable""`
+	Location    string  `form:"location" binding:"required"`
+	IsAvailable *bool   `form:"isAvailable" binding:"required"`
 }
