@@ -2,18 +2,21 @@ package service
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"enigmanations/eniqlo-store/internal/transaction"
-	"enigmanations/eniqlo-store/internal/transaction/request"
-	"enigmanations/eniqlo-store/internal/transaction/repository"
-	custRepository "enigmanations/eniqlo-store/internal/customer/repository"
-	productRepository "enigmanations/eniqlo-store/internal/product/repository"
 	custErrs "enigmanations/eniqlo-store/internal/customer/errs"
+	custRepository "enigmanations/eniqlo-store/internal/customer/repository"
 	productErrs "enigmanations/eniqlo-store/internal/product/errs"
+	productRepository "enigmanations/eniqlo-store/internal/product/repository"
+	"enigmanations/eniqlo-store/internal/transaction"
 	"enigmanations/eniqlo-store/internal/transaction/errs"
+	"enigmanations/eniqlo-store/internal/transaction/repository"
+	"enigmanations/eniqlo-store/internal/transaction/request"
+	"enigmanations/eniqlo-store/pkg/uuid"
 	"enigmanations/eniqlo-store/pkg/validate"
 	"enigmanations/eniqlo-store/util"
-	"enigmanations/eniqlo-store/pkg/uuid"
+	"fmt"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+	"golang.org/x/sync/errgroup"
 )
 
 type TransactionService interface {
@@ -22,9 +25,9 @@ type TransactionService interface {
 }
 
 type TransactionDependency struct {
-	Transaction      repository.TransactionRepository
-	Product      	 productRepository.ProductRepository
-	Customer      	 custRepository.CustomerRepository
+	Transaction repository.TransactionRepository
+	Product     productRepository.ProductRepository
+	Customer    custRepository.CustomerRepository
 }
 
 type transactionService struct {
@@ -37,9 +40,85 @@ func NewTransactionService(ctx context.Context, pool *pgxpool.Pool, repo *Transa
 	return &transactionService{repo: repo, pool: pool, context: ctx}
 }
 
+type productDetailsBatchRet struct {
+	detail transaction.ProductDetail
+}
+
+func (svc *transactionService) readProductDetailsEntries(items []request.ProductDetail) error {
+	repo := svc.repo
+
+	total := 0
+	var details []transaction.ProductDetail
+
+	for _, item := range items {
+		isValidateUuid := validate.IsValidUUID(item.ProductId)
+		if !isValidateUuid {
+			return productErrs.ProductIsNotExists
+		}
+
+		productExists, err := repo.Product.FindById(svc.context, item.ProductId)
+		if err != nil {
+			return err
+		}
+		if productExists == nil {
+			return productErrs.ProductIsNotExists
+		}
+		if productExists.Stock < item.Quantity {
+			return productErrs.StockIsNotEnough
+		}
+
+		detail := transaction.ProductDetail{
+			ProductId: item.ProductId,
+			Quantity:  item.Quantity,
+		}
+		details = append(details, detail)
+		total += int(productExists.Price * float64(detail.Quantity))
+	}
+
+	return nil
+}
+
+// batch orchestrates
+func (svc *transactionService) readProductDetailsBatch(ps []request.ProductDetail, batchSize int) error {
+
+	batches := make(chan []request.ProductDetail)
+	var g errgroup.Group
+
+	// Function to process items
+
+	// Start worker goroutines
+	// Listen on `jobsCh` to see if there is any resource pending in it.
+	for batch := range batches {
+		g.Go(func() error {
+			return svc.readProductDetailsEntries(batch)
+		})
+	}
+
+	// Send items to be processed and push into `batches` channel
+	for i := 0; i < len(ps); i += batchSize {
+		j := i + batchSize
+		if j > len(ps) {
+			j = len(ps)
+		}
+
+		// Send items to be processed
+		batches <- ps[i:j]
+	}
+
+	// Close the channel to signal that all items have been sent
+	close(batches)
+
+	// Wait for all goroutines to finish
+	if err := g.Wait(); err != nil {
+		return fmt.Errorf("readProductDetailsBatch result error: %v\n", err)
+	}
+
+	return nil
+}
 
 func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Result[interface{}] {
 	repo := svc.repo
+
 	result := make(chan util.Result[interface{}])
 	go func() {
 		customerFound, err := repo.Customer.FindById(svc.context, p.CustomerId)
@@ -62,9 +141,8 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 		var details []transaction.ProductDetail
 
 		for _, detail := range p.ProductDetails {
-			validateUuid := validate.IsValidUUID(detail.ProductId)
-
-			if !validateUuid {
+			isValidateUuid := validate.IsValidUUID(detail.ProductId)
+			if !isValidateUuid {
 				result <- util.Result[interface{}]{
 					Error: productErrs.ProductIsNotExists,
 				}
@@ -95,7 +173,7 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 
 			d := transaction.ProductDetail{
 				ProductId: detail.ProductId,
-				Quantity: detail.Quantity,
+				Quantity:  detail.Quantity,
 			}
 
 			details = append(details, d)
@@ -120,10 +198,10 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 
 		id := uuid.New()
 		trx := transaction.Transaction{
-			TransactionId:  id,
-			CustomerId:		p.CustomerId,
-			Paid: 			float64(p.Paid),
-			Change: 		float64(*p.Change),
+			TransactionId: id,
+			CustomerId:    p.CustomerId,
+			Paid:          float64(p.Paid),
+			Change:        float64(*p.Change),
 		}
 		newTrx, err := repo.Transaction.Save(svc.context, trx, float64(total))
 		if err != nil {
@@ -152,7 +230,7 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 		result <- util.Result[interface{}]{}
 		close(result)
 	}()
-	
+
 	return result
 }
 
