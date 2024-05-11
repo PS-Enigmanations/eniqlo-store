@@ -75,7 +75,7 @@ func (c *productController) CreateProduct(ctx *gin.Context) {
 
 	productCreated := <-c.Service.SaveProduct(&reqBody)
 	if productCreated.Error != nil {
-		if productCreated.Error.Error() == errs.ErrImageUrlInvalid.Error() {
+		if productCreated.Error == errs.ErrImageUrlInvalid {
 			ctx.AbortWithError(http.StatusBadRequest, productCreated.Error)
 			return
 		}
@@ -98,11 +98,11 @@ func (c *productController) UpdateProduct(ctx *gin.Context) {
 
 	productSaved := <-c.Service.SaveProduct(&reqBody)
 	if productSaved.Error != nil {
-		if productSaved.Error.Error() == errs.ErrProductNotFound.Error() {
+		if productSaved.Error == errs.ErrProductNotFound {
 			ctx.AbortWithError(http.StatusNotFound, productSaved.Error)
 			return
 		}
-		if productSaved.Error.Error() == errs.ErrImageUrlInvalid.Error() {
+		if productSaved.Error == errs.ErrImageUrlInvalid {
 			ctx.AbortWithError(http.StatusBadRequest, productSaved.Error)
 			return
 		}
@@ -118,7 +118,7 @@ func (c *productController) DeleteProduct(ctx *gin.Context) {
 	id := ctx.Param("id")
 	err := <-c.Service.DeleteProduct(id)
 	if err != nil {
-		if err.Error() == errs.ErrProductNotFound.Error() {
+		if err == errs.ErrProductNotFound {
 			ctx.AbortWithError(http.StatusNotFound, err)
 			return
 		}
