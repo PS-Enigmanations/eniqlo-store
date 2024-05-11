@@ -300,6 +300,7 @@ func (db *database) FindById(ctx context.Context, id string) (*product.Product, 
 		&c.Stock,
 		&c.IsAvailable,
 	)
+
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, nil
