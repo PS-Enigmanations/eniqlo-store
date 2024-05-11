@@ -86,7 +86,7 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 				return
 			}
 
-			if productExists.Stock <= detail.Quantity {
+			if productExists.Stock < detail.Quantity {
 				result <- util.Result[interface{}]{
 					Error: productErrs.StockIsNotEnough,
 				}
@@ -111,7 +111,7 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 		}
 
 		validChange := p.Paid - float64(total)
-		if validChange != p.Change {
+		if validChange != *p.Change {
 			result <- util.Result[interface{}]{
 				Error: errs.ChangeIsNotRight,
 			}
@@ -123,7 +123,7 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 			TransactionId:  id,
 			CustomerId:		p.CustomerId,
 			Paid: 			float64(p.Paid),
-			Change: 		float64(p.Change),
+			Change: 		float64(*p.Change),
 		}
 		newTrx, err := repo.Transaction.Save(svc.context, trx, float64(total))
 		if err != nil {
