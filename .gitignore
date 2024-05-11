@@ -7,3 +7,7 @@ tmp
 # scp
 *.key
 *.ssh
+
+# k6
+k6
+k6/*.txt
