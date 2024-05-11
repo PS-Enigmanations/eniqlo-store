@@ -44,7 +44,7 @@ var Categories = []CategoryItem{
 	{Name: "Beverages", Search: []string{"beverages", "Beverages"}},
 }
 
-func IsHasCategory(cat string) bool {
+func HasCategory(cat string) bool {
 	found := false
 	for _, item := range Categories {
 		if slices.Contains(item.Search, cat) {

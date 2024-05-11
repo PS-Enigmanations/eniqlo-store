@@ -2,18 +2,16 @@ package service
 
 import (
 	"enigmanations/eniqlo-store/internal/staff"
+	"enigmanations/eniqlo-store/internal/staff/errs"
 	"enigmanations/eniqlo-store/internal/staff/repository"
 	"enigmanations/eniqlo-store/internal/staff/request"
-	"enigmanations/eniqlo-store/internal/staff/errs"
 	"enigmanations/eniqlo-store/pkg/bcrypt"
+	"enigmanations/eniqlo-store/pkg/country"
 	"enigmanations/eniqlo-store/pkg/jwt"
 	"enigmanations/eniqlo-store/pkg/uuid"
-	"enigmanations/eniqlo-store/pkg/country"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-	"fmt"
 )
 
 type StaffService interface {
@@ -32,17 +30,11 @@ func NewStaffService(repo repository.StaffRepository) StaffService {
 
 // Login implements StaffService.
 func (service *staffService) Login(ctx *gin.Context, req request.StaffLoginRequest) (*staff.Staff, error) {
-	isPhoneNumberValid := false
-	countries := country.Countries
-	for _, country := range countries {
-		if strings.HasPrefix(req.PhoneNumber, fmt.Sprintf("%s%s", "+", country)) {
-			isPhoneNumberValid = true
-			break
-		}
-	}
+	isPhoneNumberValid := country.IsValidPhoneCountryCode(req.PhoneNumber)
 	if !isPhoneNumberValid {
 		return nil, errors.New("invalid phone number")
 	}
+
 	staff, err := service.repo.FindByPhoneNumber(ctx.Request.Context(), req.PhoneNumber)
 	if err != nil {
 		return nil, err
@@ -60,17 +52,12 @@ func (service *staffService) Register(ctx *gin.Context, req request.StaffRegiste
 	if err != nil {
 		return nil, err
 	}
-	isPhoneNumberValid := false
-	countries := country.Countries
-	for _, country := range countries {
-		if strings.HasPrefix(req.PhoneNumber, fmt.Sprintf("%s%s", "+", country)) {
-			isPhoneNumberValid = true
-			break
-		}
-	}
+
+	isPhoneNumberValid := country.IsValidPhoneCountryCode(req.PhoneNumber)
 	if !isPhoneNumberValid {
 		return nil, errors.New("invalid phone number")
 	}
+
 	staffId := uuid.New()
 	model := staff.Staff{
 		ID:          staffId,
