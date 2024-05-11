@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"enigmanations/eniqlo-store/internal/common/errs"
 	"enigmanations/eniqlo-store/internal/product/request"
 	"enigmanations/eniqlo-store/internal/product/response"
 	"enigmanations/eniqlo-store/internal/product/service"
@@ -107,6 +108,10 @@ func (c *productController) UpdateProduct(ctx *gin.Context) {
 	reqBody.Id = ctx.Param("id")
 	_, err := c.Service.SaveProduct(&reqBody)
 	if err != nil {
+		if err.Error() == errs.ErrProductNotFound.Error() {
+			ctx.AbortWithError(http.StatusNotFound, err)
+			return
+		}
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}

@@ -6,7 +6,8 @@ import (
 )
 
 var (
-	InvalidPhoneNumber         = errors.New("Invalid phone number")
+	InvalidPhoneNumber = errors.New("Invalid phone number")
+	ErrProductNotFound = errors.New("product not found")
 )
 
 type CommonError struct {
