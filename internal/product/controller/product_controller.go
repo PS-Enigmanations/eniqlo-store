@@ -116,15 +116,12 @@ func (c *productController) UpdateProduct(ctx *gin.Context) {
 
 func (c *productController) DeleteProduct(ctx *gin.Context) {
 	id := ctx.Param("id")
-	err := c.Service.DeleteProduct(id)
+	err := <-c.Service.DeleteProduct(id)
 	if err != nil {
-		if err.Error() == "product not found" {
+		if err.Error() == errs.ErrProductNotFound.Error() {
 			ctx.AbortWithError(http.StatusNotFound, err)
 			return
 		}
-
-		ctx.AbortWithError(http.StatusInternalServerError, err)
-		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{

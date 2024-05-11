@@ -8,7 +8,6 @@ import (
 	"enigmanations/eniqlo-store/internal/product/request"
 	"enigmanations/eniqlo-store/pkg/uuid"
 	"enigmanations/eniqlo-store/util"
-	"errors"
 	"strings"
 	"time"
 
@@ -19,7 +18,7 @@ type ProductService interface {
 	SearchProducts(p *request.SearchProductQueryParams) <-chan util.Result[[]*product.Product]
 	GetProducts(p *request.SearchProductQueryParams) <-chan util.Result[[]*product.Product]
 	SaveProduct(p *request.ProductRequest) <-chan util.Result[*product.Product]
-	DeleteProduct(id string) error
+	DeleteProduct(id string) <-chan error
 }
 
 type ProductDependency struct {
@@ -93,7 +92,7 @@ func (svc *productService) SaveProduct(p *request.ProductRequest) <-chan util.Re
 		currentDateTime := time.Now()
 		if p.Id != "" {
 			productId = p.Id
-			findProduct, err := repo.Product.SearchProducts(svc.context, &request.SearchProductQueryParams{Id: productId}, false)
+			findProduct, err := repo.Product.SearchProducts(svc.context, &request.SearchProductQueryParams{Id: productId}, true)
 			if err != nil || len(findProduct) == 0 {
 				result <- util.Result[*product.Product]{
 					Error: errs.ErrProductNotFound,
@@ -151,22 +150,24 @@ func (svc *productService) SaveProduct(p *request.ProductRequest) <-chan util.Re
 	return result
 }
 
-func (svc *productService) DeleteProduct(id string) error {
+func (svc *productService) DeleteProduct(id string) <-chan error {
 	repo := svc.repo
 
-	product, err := repo.Product.SearchProducts(svc.context, &request.SearchProductQueryParams{Id: id}, false)
-	if err != nil {
-		return err
-	}
+	result := make(chan error)
+	go func() {
+		findProduct, err := repo.Product.SearchProducts(svc.context, &request.SearchProductQueryParams{Id: id}, true)
+		if err != nil || len(findProduct) == 0 {
+			result <- errs.ErrProductNotFound
+		}
+		err = repo.Product.DeleteProduct(svc.context, id)
+		if err != nil {
+			result <- err
+			return
+		}
 
-	if len(product) == 0 {
-		return errors.New("product not found")
-	}
+		result <- nil
+		close(result)
+	}()
 
-	err = repo.Product.DeleteProduct(svc.context, id)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return result
 }
