@@ -9,14 +9,15 @@ import (
 	"enigmanations/eniqlo-store/pkg/country"
 	"enigmanations/eniqlo-store/pkg/jwt"
 	"enigmanations/eniqlo-store/pkg/uuid"
+	"enigmanations/eniqlo-store/util"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 )
 
 type StaffService interface {
-	Login(ctx *gin.Context, req request.StaffLoginRequest) (*staff.Staff, error)
-	Register(ctx *gin.Context, req request.StaffRegisterRequest) (*staff.Staff, error)
+	Login(ctx *gin.Context, req request.StaffLoginRequest) <-chan util.Result[*staff.Staff]
+	Register(ctx *gin.Context, req request.StaffRegisterRequest) <-chan util.Result[*staff.Staff]
 	GenerateAccessToken(staff *staff.Staff) (string, error)
 }
 
@@ -29,58 +30,90 @@ func NewStaffService(repo repository.StaffRepository) StaffService {
 }
 
 // Login implements StaffService.
-func (service *staffService) Login(ctx *gin.Context, req request.StaffLoginRequest) (*staff.Staff, error) {
-	isPhoneNumberValid := country.IsValidPhoneCountryCode(req.PhoneNumber)
-	if !isPhoneNumberValid {
-		return nil, errors.New("invalid phone number")
-	}
-
-	staff, err := service.repo.FindByPhoneNumber(ctx.Request.Context(), req.PhoneNumber)
-	if err != nil {
-		return nil, err
-	}
-	if !bcrypt.CheckPasswordHash(req.Password, staff.Password) {
-		return nil, errors.New("invalid password")
-	}
-
-	return staff, nil
+func (service *staffService) Login(ctx *gin.Context, req request.StaffLoginRequest) <-chan util.Result[*staff.Staff] {
+	result := make(chan util.Result[*staff.Staff])
+	go func() {
+		isPhoneNumberValid := country.IsValidPhoneCountryCode(req.PhoneNumber)
+		if !isPhoneNumberValid {
+			result <- util.Result[*staff.Staff]{
+				Error: errors.New("invalid phone number"),
+			}
+			staffFound, err := service.repo.FindByPhoneNumber(ctx.Request.Context(), req.PhoneNumber)
+			if err != nil {
+				result <- util.Result[*staff.Staff]{
+					Error: err,
+				}
+				return
+			}
+			if !bcrypt.CheckPasswordHash(req.Password, staffFound.Password) {
+				result <- util.Result[*staff.Staff]{
+					Error: errors.New("invalid password"),
+				}
+			}
+			result <- util.Result[*staff.Staff]{
+				Result: staffFound,
+			}
+		}
+	}()
+	return result
 }
 
 // Register implements StaffService.
-func (service *staffService) Register(ctx *gin.Context, req request.StaffRegisterRequest) (*staff.Staff, error) {
-	hashedPassword, err := bcrypt.HashPassword(req.Password)
-	if err != nil {
-		return nil, err
-	}
+func (service *staffService) Register(ctx *gin.Context, req request.StaffRegisterRequest) <-chan util.Result[*staff.Staff] {
+	result := make(chan util.Result[*staff.Staff])
+	go func() {
+		hashedPassword, err := bcrypt.HashPassword(req.Password)
+		if err != nil {
+			result <- util.Result[*staff.Staff]{
+				Error: err,
+			}
+			return
+		}
 
-	isPhoneNumberValid := country.IsValidPhoneCountryCode(req.PhoneNumber)
-	if !isPhoneNumberValid {
-		return nil, errors.New("invalid phone number")
-	}
+		isPhoneNumberValid := country.IsValidPhoneCountryCode(req.PhoneNumber)
+		if !isPhoneNumberValid {
+			result <- util.Result[*staff.Staff]{
+				Error: errors.New("invalid phone number"),
+			}
+			return
+		}
 
-	staffId := uuid.New()
-	model := staff.Staff{
-		ID:          staffId,
-		PhoneNumber: req.PhoneNumber,
-		Name:        req.Name,
-		Password:    hashedPassword,
-	}
+		staffId := uuid.New()
+		model := staff.Staff{
+			ID:          staffId,
+			PhoneNumber: req.PhoneNumber,
+			Name:        req.Name,
+			Password:    hashedPassword,
+		}
 
-	staffFound, err := service.repo.FindByPhoneNumber(ctx.Request.Context(), req.PhoneNumber)
-	if err != nil {
-		return nil, err
-	}
+		staffFound, err := service.repo.FindByPhoneNumber(ctx.Request.Context(), req.PhoneNumber)
+		if err != nil {
+			result <- util.Result[*staff.Staff]{
+				Error: err,
+			}
+			return
+		}
+		if staffFound != nil {
+			result <- util.Result[*staff.Staff]{
+				Error: errs.UserExist,
+			}
+			return
+		}
 
-	if staffFound != nil {
-		return nil, errs.UserExist
-	}
+		staffCreated, err := service.repo.Save(ctx.Request.Context(), &model)
+		if err != nil {
+			result <- util.Result[*staff.Staff]{
+				Error: err,
+			}
+			return
+		}
 
-	staff, err := service.repo.Save(ctx.Request.Context(), &model)
-	if err != nil {
-		return nil, err
-	}
+		result <- util.Result[*staff.Staff]{
+			Result: staffCreated,
+		}
+	}()
 
-	return staff, nil
+	return result
 }
 
 func (service *staffService) GenerateAccessToken(staff *staff.Staff) (string, error) {

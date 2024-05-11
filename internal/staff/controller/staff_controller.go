@@ -5,8 +5,8 @@ import (
 	"enigmanations/eniqlo-store/internal/staff/request"
 	"enigmanations/eniqlo-store/internal/staff/response"
 	"enigmanations/eniqlo-store/internal/staff/service"
-	"net/http"
 	"errors"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
