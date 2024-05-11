@@ -13,6 +13,7 @@ import (
 	"enigmanations/eniqlo-store/internal/transaction/errs"
 	"enigmanations/eniqlo-store/pkg/validate"
 	"enigmanations/eniqlo-store/util"
+	"enigmanations/eniqlo-store/pkg/uuid"
 )
 
 type TransactionService interface {
@@ -58,6 +59,8 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 
 		total := 0
 
+		var details []transaction.ProductDetail
+
 		for _, detail := range p.ProductDetails {
 			validateUuid := validate.IsValidUUID(detail.ProductId)
 
@@ -90,20 +93,58 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 				return
 			}
 
+			d := transaction.ProductDetail{
+				ProductId: detail.ProductId,
+				Quantity: detail.Quantity,
+			}
+
+			details = append(details, d)
+
 			total += int(productExists.Price * float64(detail.Quantity))
 		}
 
-		if total > p.Paid {
+		if float64(total) > p.Paid {
 			result <- util.Result[interface{}]{
 				Error: errs.PaidIsNotEnough,
 			}
 			return
 		}
 
-		validChange := p.Paid - total
+		validChange := p.Paid - float64(total)
 		if validChange != p.Change {
 			result <- util.Result[interface{}]{
 				Error: errs.ChangeIsNotRight,
+			}
+			return
+		}
+
+		id := uuid.New()
+		trx := transaction.Transaction{
+			TransactionId:  id,
+			CustomerId:		p.CustomerId,
+			Paid: 			float64(p.Paid),
+			Change: 		float64(p.Change),
+		}
+		newTrx, err := repo.Transaction.Save(svc.context, trx, float64(total))
+		if err != nil {
+			result <- util.Result[interface{}]{
+				Error: err,
+			}
+			return
+		}
+
+		err = repo.Transaction.SaveDetails(svc.context, details, newTrx.TransactionId)
+		if err != nil {
+			result <- util.Result[interface{}]{
+				Error: err,
+			}
+			return
+		}
+
+		err = repo.Product.UpdateStocks(svc.context, details)
+		if err != nil {
+			result <- util.Result[interface{}]{
+				Error: err,
 			}
 			return
 		}
