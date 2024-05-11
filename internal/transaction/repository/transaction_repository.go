@@ -122,6 +122,9 @@ func (db *Database) GetAllByParams(ctx context.Context, params *request.Transact
 	if len(order) > 0 {
 		o := " ORDER BY " + strings.Join(order, ", ")
 		sql += o
+	} else {
+		o := " ORDER BY created_at desc"
+		sql += o
 	}
 
 	// Limit (default: 5)
