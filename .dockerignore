@@ -34,3 +34,5 @@ docker-deploy.sh
 
 # Golang
 testing
+
+k6
