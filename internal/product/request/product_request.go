@@ -17,12 +17,12 @@ type SearchProductQueryParams struct {
 
 type ProductRequest struct {
 	Id          string  `form:"id"`
-	Name        string  `form:"name" binding:"required"`
-	Sku         string  `form:"sku" binding:"required"`
+	Name        string  `form:"name" binding:"required,min=1,max=30"`
+	Sku         string  `form:"sku" binding:"required,min=1,max=30"`
 	Category    string  `form:"category" binding:"oneof=Clothing Accessories Footwear Beverages"`
 	ImageUrl    string  `form:"imageUrl" binding:"required,url"`
 	Notes       string  `form:"notes" binding:"required,min=1,max=200"`
-	Price       float64 `form:"price" binding:"required"`
+	Price       float64 `form:"price" binding:"required,min=1"`
 	Stock       int     `form:"stock" binding:"required,min=0,max=100000"`
 	Location    string  `form:"location" binding:"required"`
 	IsAvailable *bool   `form:"isAvailable" binding:"required"`
