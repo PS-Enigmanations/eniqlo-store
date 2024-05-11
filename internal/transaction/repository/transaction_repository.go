@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"enigmanations/eniqlo-store/internal/transaction"
 	"enigmanations/eniqlo-store/internal/transaction/request"
-	"enigmanations/eniqlo-store/util"
 	"enigmanations/eniqlo-store/pkg/uuid"
 	"enigmanations/eniqlo-store/pkg/validate"
 	"fmt"
