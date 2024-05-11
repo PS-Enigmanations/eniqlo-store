@@ -3,8 +3,8 @@ package repository
 import (
 	"context"
 	"enigmanations/eniqlo-store/internal/product"
-	"enigmanations/eniqlo-store/internal/transaction"
 	"enigmanations/eniqlo-store/internal/product/request"
+	"enigmanations/eniqlo-store/internal/transaction"
 	"enigmanations/eniqlo-store/pkg/validate"
 	"fmt"
 	"strconv"
@@ -300,6 +300,7 @@ func (db *database) FindById(ctx context.Context, id string) (*product.Product, 
 		&c.Stock,
 		&c.IsAvailable,
 	)
+
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, nil
