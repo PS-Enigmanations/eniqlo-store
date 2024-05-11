@@ -1,14 +1,13 @@
 package controller
 
 import (
+	"enigmanations/eniqlo-store/internal/common/errs"
 	"enigmanations/eniqlo-store/internal/product/request"
 	"enigmanations/eniqlo-store/internal/product/response"
 	"enigmanations/eniqlo-store/internal/product/service"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 )
 
 type ProductController interface {
@@ -45,7 +44,6 @@ func (c *productController) Index(ctx *gin.Context) {
 	productMappedResults := response.ProductToSearchProductsResponse(productShows)
 
 	ctx.JSON(http.StatusOK, productMappedResults)
-	return
 }
 
 func (c *productController) SearchProducts(ctx *gin.Context) {
@@ -70,23 +68,18 @@ func (c *productController) SearchProducts(ctx *gin.Context) {
 
 func (c *productController) CreateProduct(ctx *gin.Context) {
 	var reqBody request.ProductRequest
-
 	if err := ctx.ShouldBindJSON(&reqBody); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	validate := validator.New()
-	err := validate.Struct(reqBody)
-	if err != nil {
-		fmt.Println(err)
-		ctx.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
 	// send data to service layer to further process (create record)
 	productCreated, err := c.Service.SaveProduct(&reqBody)
 	if err != nil {
+		if err.Error() == errs.ErrImageUrlInvalid.Error() {
+			ctx.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -98,22 +91,28 @@ func (c *productController) CreateProduct(ctx *gin.Context) {
 
 func (c *productController) UpdateProduct(ctx *gin.Context) {
 	var reqBody request.ProductRequest
+	reqBody.Id = ctx.Param("id")
 
 	if err := ctx.ShouldBindJSON(&reqBody); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	reqBody.Id = ctx.Param("id")
 	_, err := c.Service.SaveProduct(&reqBody)
 	if err != nil {
+		if err.Error() == errs.ErrProductNotFound.Error() {
+			ctx.AbortWithError(http.StatusNotFound, err)
+			return
+		}
+		if err.Error() == errs.ErrImageUrlInvalid.Error() {
+			ctx.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "Product updated successfully",
-	})
+	ctx.Status(http.StatusOK)
 }
 
 func (c *productController) DeleteProduct(ctx *gin.Context) {
