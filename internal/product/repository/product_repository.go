@@ -78,7 +78,7 @@ func (db *database) SearchProducts(ctx context.Context, params *request.SearchPr
 	}
 	// Category
 	if params.Category != "" {
-		if product.IsHasCategory(params.Category) {
+		if product.HasCategory(params.Category) {
 			args = append(args, params.Category)
 			where = append(where, fmt.Sprintf(`"category" ilike $%d`, len(args)))
 		}
