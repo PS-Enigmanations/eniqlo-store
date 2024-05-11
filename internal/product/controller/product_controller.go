@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 )
 
 type ProductController interface {
@@ -99,14 +98,7 @@ func (c *productController) UpdateProduct(ctx *gin.Context) {
 		return
 	}
 
-	validate := validator.New()
-	err := validate.Struct(&reqBody)
-	if err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-
-	_, err = c.Service.SaveProduct(&reqBody)
+	_, err := c.Service.SaveProduct(&reqBody)
 	if err != nil {
 		if err.Error() == errs.ErrProductNotFound.Error() {
 			ctx.AbortWithError(http.StatusNotFound, err)
