@@ -116,7 +116,7 @@ func (c *productController) UpdateProduct(ctx *gin.Context) {
 
 func (c *productController) DeleteProduct(ctx *gin.Context) {
 	id := ctx.Param("id")
-	err := <-c.Service.DeleteProduct(id)
+	err := c.Service.DeleteProduct(id)
 	if err != nil {
 		if err == errs.ErrProductNotFound {
 			ctx.AbortWithError(http.StatusNotFound, err)

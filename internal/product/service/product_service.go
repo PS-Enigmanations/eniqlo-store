@@ -18,7 +18,7 @@ type ProductService interface {
 	SearchProducts(p *request.SearchProductQueryParams) <-chan util.Result[[]*product.Product]
 	GetProducts(p *request.SearchProductQueryParams) <-chan util.Result[[]*product.Product]
 	SaveProduct(p *request.ProductRequest) <-chan util.Result[*product.Product]
-	DeleteProduct(id string) <-chan error
+	DeleteProduct(id string) error
 }
 
 type ProductDependency struct {
@@ -150,24 +150,17 @@ func (svc *productService) SaveProduct(p *request.ProductRequest) <-chan util.Re
 	return result
 }
 
-func (svc *productService) DeleteProduct(id string) <-chan error {
+func (svc *productService) DeleteProduct(id string) error {
 	repo := svc.repo
 
-	result := make(chan error)
-	go func() {
-		findProduct, err := repo.Product.SearchProducts(svc.context, &request.SearchProductQueryParams{Id: id}, true)
-		if err != nil || len(findProduct) == 0 {
-			result <- errs.ErrProductNotFound
-		}
-		err = repo.Product.DeleteProduct(svc.context, id)
-		if err != nil {
-			result <- err
-			return
-		}
+	findProduct, err := repo.Product.SearchProducts(svc.context, &request.SearchProductQueryParams{Id: id}, true)
+	if err != nil || len(findProduct) == 0 {
+		return errs.ErrProductNotFound
+	}
+	err = repo.Product.DeleteProduct(svc.context, id)
+	if err != nil {
+		return err
+	}
 
-		result <- nil
-		close(result)
-	}()
-
-	return result
+	return nil
 }
