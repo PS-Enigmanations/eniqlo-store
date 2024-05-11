@@ -13,11 +13,8 @@ import (
 	"enigmanations/eniqlo-store/pkg/uuid"
 	"enigmanations/eniqlo-store/pkg/validate"
 	"enigmanations/eniqlo-store/util"
-	"fmt"
-	"sync"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"golang.org/x/sync/errgroup"
 )
 
 type TransactionService interface {
@@ -46,113 +43,6 @@ type productDetailsBatchRet struct {
 	orderItems []transaction.ProductDetail
 }
 
-// batch orchestrates
-func (svc *transactionService) readProductDetailsBatch(
-	p *request.CheckoutRequest,
-	batchSize int,
-) util.Result[*productDetailsBatchRet] {
-	repo := svc.repo
-
-	var batches [][]request.ProductDetail
-	var g errgroup.Group
-	var mutex sync.Mutex
-
-	var totalAccumulated = 0
-	var orderItems []transaction.ProductDetail
-	var errs error
-
-	// Create batches chunks
-	batchChunksCh := make(chan []request.ProductDetail)
-	for i := 0; i < len(p.ProductDetails); i += batchSize {
-		j := i + batchSize
-		if j > len(p.ProductDetails) {
-			j = len(p.ProductDetails)
-		}
-
-		batches = append(batches, p.ProductDetails[i:j])
-	}
-
-	// Function to process items
-	readProductDetailsEntries := func() error {
-		// Listen on `batchChunksCh` to see if there is any resource pending in it.
-		for chunks := range batchChunksCh {
-			for _, item := range chunks {
-				// When it releases the lock, another goroutine can acquire it
-				// and continue working with the slice.
-				defer mutex.Unlock() // <- defers the execution until the func returns (will release the lock)
-
-				// When a goroutine acquires the lock, it can safely add items
-				// to the slice without worrying about race conditions.
-				mutex.Lock()
-
-				isValidateUuid := validate.IsValidUUID(item.ProductId)
-				if !isValidateUuid {
-					errs = productErrs.ProductIsNotExists
-					return nil
-				}
-
-				productExists, err := repo.Product.FindById(svc.context, item.ProductId)
-				if err != nil {
-					errs = err
-					return nil
-				}
-				if productExists == nil {
-					errs = productErrs.ProductIsNotExists
-					return nil
-				}
-				if productExists.Stock < item.Quantity {
-					errs = productErrs.StockIsNotEnough
-					return nil
-				}
-
-				orderItems = append(orderItems, transaction.ProductDetail{
-					ProductId: item.ProductId,
-					Quantity:  item.Quantity,
-				})
-
-				totalAccumulated += int(productExists.Price * float64(item.Quantity))
-			}
-		}
-
-		return nil
-	}
-
-	// Start worker goroutines
-	for range batches {
-		g.Go(func() error {
-			return readProductDetailsEntries()
-		})
-	}
-
-	// Send items to be processed
-	for _, item := range batches {
-		batchChunksCh <- item
-	}
-
-	// Close the channel to signal that all items have been sent
-	close(batchChunksCh)
-
-	// Wait for all goroutines to finish
-	if err := g.Wait(); err != nil {
-		return util.Result[*productDetailsBatchRet]{
-			Error: err,
-		}
-	}
-
-	if errs != nil {
-		return util.Result[*productDetailsBatchRet]{
-			Error: errs,
-		}
-	}
-
-	return util.Result[*productDetailsBatchRet]{
-		Result: &productDetailsBatchRet{
-			totalOrder: totalAccumulated,
-			orderItems: orderItems,
-		},
-	}
-}
-
 func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.ResultErr {
 	repo := svc.repo
 
@@ -173,24 +63,67 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 			return
 		}
 
-		details := svc.readProductDetailsBatch(p, 2)
-		if details.Error != nil {
-			fmt.Printf("Result error %v %s", details.Error, "\n")
-			result <- util.ResultErr{
-				Error: details.Error,
+		total := 0
+
+		var details []transaction.ProductDetail
+
+		for _, detail := range p.ProductDetails {
+			validateUuid := validate.IsValidUUID(detail.ProductId)
+
+			if !validateUuid {
+				result <- util.ResultErr{
+					Error: productErrs.ProductIsNotExists,
+				}
+				return
 			}
-			return
+
+			productExists, err := repo.Product.FindById(svc.context, detail.ProductId)
+			if err != nil {
+				result <- util.ResultErr{
+					Error: err,
+				}
+				return
+			}
+
+			if productExists == nil {
+				result <- util.ResultErr{
+					Error: productErrs.ProductIsNotExists,
+				}
+				return
+			}
+
+			if productExists.Stock < detail.Quantity {
+				result <- util.ResultErr{
+					Error: productErrs.StockIsNotEnough,
+				}
+				return
+			}
+
+			if productExists.IsAvailable != true {
+				result <- util.ResultErr{
+					Error: productErrs.ProductIsNotAvailable,
+				}
+				return
+			}
+
+			d := transaction.ProductDetail{
+				ProductId: detail.ProductId,
+				Quantity:  detail.Quantity,
+			}
+
+			details = append(details, d)
+
+			total += int(productExists.Price * float64(detail.Quantity))
 		}
 
-		if float64(details.Result.totalOrder) > p.Paid {
+		if float64(total) > p.Paid {
 			result <- util.ResultErr{
 				Error: errs.PaidIsNotEnough,
 			}
-
 			return
 		}
 
-		validChange := p.Paid - float64(details.Result.totalOrder)
+		validChange := p.Paid - float64(total)
 		if validChange != *p.Change {
 			result <- util.ResultErr{
 				Error: errs.ChangeIsNotRight,
@@ -205,7 +138,7 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 			Paid:          float64(p.Paid),
 			Change:        float64(*p.Change),
 		}
-		newTrx, err := repo.Transaction.Save(svc.context, trx, float64(details.Result.totalOrder))
+		newTrx, err := repo.Transaction.Save(svc.context, trx, float64(total))
 		if err != nil {
 			result <- util.ResultErr{
 				Error: err,
@@ -213,7 +146,7 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 			return
 		}
 
-		err = repo.Transaction.SaveDetails(svc.context, details.Result.orderItems, newTrx.TransactionId)
+		err = repo.Transaction.SaveDetails(svc.context, details, newTrx.TransactionId)
 		if err != nil {
 			result <- util.ResultErr{
 				Error: err,
@@ -221,7 +154,7 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 			return
 		}
 
-		err = repo.Product.UpdateStocks(svc.context, details.Result.orderItems)
+		err = repo.Product.UpdateStocks(svc.context, details)
 		if err != nil {
 			result <- util.ResultErr{
 				Error: err,
