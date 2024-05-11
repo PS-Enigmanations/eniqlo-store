@@ -7,6 +7,7 @@ import (
 
 var (
 	ProductIsNotExists       = errors.New("Product is not exists")
+	ProductIsNotAvailable    = errors.New("Product is not available")
 	StockIsNotEnough         = errors.New("Stock is not enough")
 )
 

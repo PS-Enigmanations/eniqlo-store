@@ -61,6 +61,9 @@ func (c *transactionController) Checkout(ctx *gin.Context) {
 		case errors.Is(checkoutCreated.Error, productErrs.StockIsNotEnough):
 			ctx.AbortWithError(http.StatusBadRequest, checkoutCreated.Error)
 			break
+		case errors.Is(checkoutCreated.Error, productErrs.ProductIsNotAvailable):
+			ctx.AbortWithError(http.StatusBadRequest, checkoutCreated.Error)
+			break
 		default:
 			ctx.AbortWithError(http.StatusInternalServerError, checkoutCreated.Error)
 			break
