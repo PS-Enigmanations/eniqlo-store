@@ -93,6 +93,13 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 				return
 			}
 
+			if productExists.IsAvailable != true {
+				result <- util.Result[interface{}]{
+					Error: productErrs.ProductIsNotAvailable,
+				}
+				return
+			}
+
 			d := transaction.ProductDetail{
 				ProductId: detail.ProductId,
 				Quantity: detail.Quantity,
