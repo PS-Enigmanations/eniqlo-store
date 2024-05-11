@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"enigmanations/eniqlo-store/internal/product"
+	"enigmanations/eniqlo-store/internal/transaction"
 	"enigmanations/eniqlo-store/internal/product/request"
 	"enigmanations/eniqlo-store/util"
 	"fmt"
@@ -18,6 +19,7 @@ type ProductRepository interface {
 	SearchProducts(ctx context.Context, params *request.SearchProductQueryParams, alwaysAvailable bool) ([]*product.Product, error)
 	SaveProduct(ctx context.Context, p *product.Product) (*product.Product, error)
 	DeleteProduct(ctx context.Context, id string) error
+	UpdateStocks(ctx context.Context, details []transaction.ProductDetail) error
 }
 
 type database struct {
@@ -295,4 +297,23 @@ func (db *database) FindById(ctx context.Context, id string) (*product.Product, 
 	}
 
 	return c, nil
+}
+
+func (db *database) UpdateStocks(ctx context.Context, details []transaction.ProductDetail) error {
+	sql := `
+		UPDATE products
+		SET
+			stock = stock - $2
+		WHERE
+			id = $1
+	`
+
+	for _, model := range details {
+		_, err := db.pool.Exec(ctx, sql, model.ProductId, model.Quantity)
+		if err != nil {
+			return fmt.Errorf("Update stock %w", err)
+		}
+	}
+
+	return nil
 }
