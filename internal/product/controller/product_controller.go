@@ -73,19 +73,17 @@ func (c *productController) CreateProduct(ctx *gin.Context) {
 		return
 	}
 
-	// send data to service layer to further process (create record)
-	productCreated, err := c.Service.SaveProduct(&reqBody)
-	if err != nil {
-		if err.Error() == errs.ErrImageUrlInvalid.Error() {
-			ctx.AbortWithError(http.StatusBadRequest, err)
+	productCreated := <-c.Service.SaveProduct(&reqBody)
+	if productCreated.Error != nil {
+		if productCreated.Error.Error() == errs.ErrImageUrlInvalid.Error() {
+			ctx.AbortWithError(http.StatusBadRequest, productCreated.Error)
 			return
 		}
-		ctx.AbortWithError(http.StatusInternalServerError, err)
+		ctx.AbortWithError(http.StatusInternalServerError, productCreated.Error)
 		return
 	}
 
-	// Mapping data from service to response
-	productCreatedMappedResult := response.ProductToProductCreateResponse(productCreated)
+	productCreatedMappedResult := response.ProductToProductCreateResponse(productCreated.Result)
 	ctx.JSON(http.StatusCreated, productCreatedMappedResult)
 }
 
@@ -98,18 +96,19 @@ func (c *productController) UpdateProduct(ctx *gin.Context) {
 		return
 	}
 
-	_, err := c.Service.SaveProduct(&reqBody)
-	if err != nil {
-		if err.Error() == errs.ErrProductNotFound.Error() {
-			ctx.AbortWithError(http.StatusNotFound, err)
+	productSaved := <-c.Service.SaveProduct(&reqBody)
+	if productSaved.Error != nil {
+		if productSaved.Error.Error() == errs.ErrProductNotFound.Error() {
+			ctx.AbortWithError(http.StatusNotFound, productSaved.Error)
 			return
 		}
-		if err.Error() == errs.ErrImageUrlInvalid.Error() {
-			ctx.AbortWithError(http.StatusBadRequest, err)
+		if productSaved.Error.Error() == errs.ErrImageUrlInvalid.Error() {
+			ctx.AbortWithError(http.StatusBadRequest, productSaved.Error)
 			return
 		}
-		ctx.AbortWithError(http.StatusInternalServerError, err)
+		ctx.AbortWithError(http.StatusInternalServerError, productSaved.Error)
 		return
+
 	}
 
 	ctx.Status(http.StatusOK)

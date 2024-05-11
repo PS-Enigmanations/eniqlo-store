@@ -3,8 +3,8 @@ package repository
 import (
 	"context"
 	"enigmanations/eniqlo-store/internal/product"
-	"enigmanations/eniqlo-store/internal/transaction"
 	"enigmanations/eniqlo-store/internal/product/request"
+	"enigmanations/eniqlo-store/internal/transaction"
 	"enigmanations/eniqlo-store/pkg/validate"
 	"fmt"
 	"strconv"
@@ -322,7 +322,7 @@ func (db *database) UpdateStocks(ctx context.Context, details []transaction.Prod
 	for _, model := range details {
 		_, err := db.pool.Exec(ctx, sql, model.ProductId, model.Quantity)
 		if err != nil {
-			return fmt.Errorf("Update stock %w", err)
+			return fmt.Errorf("update stock %w", err)
 		}
 	}
 
