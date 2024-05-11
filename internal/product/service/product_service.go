@@ -117,7 +117,7 @@ func (svc *productService) SaveProduct(p *request.ProductRequest) (*product.Prod
 		Price:       p.Price,
 		Stock:       p.Stock,
 		Location:    p.Location,
-		IsAvailable: p.IsAvailable,
+		IsAvailable: *p.IsAvailable,
 	}
 	if p.Id != "" {
 		productModel.UpdatedAt = currentDateTime

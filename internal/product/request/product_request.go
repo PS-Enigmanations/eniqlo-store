@@ -25,5 +25,5 @@ type ProductRequest struct {
 	Price       float64 `form:"price" binding:"required"`
 	Stock       int     `form:"stock" binding:"required,min=0,max=100000"`
 	Location    string  `form:"location" binding:"required"`
-	IsAvailable bool    `form:"isAvailable"`
+	IsAvailable *bool   `form:"isAvailable" binding:"required"`
 }
