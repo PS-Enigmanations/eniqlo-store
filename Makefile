@@ -14,7 +14,7 @@ kill:
 dev: build up
 
 ## prod: run build and up on production environment.
-prod: build-prod up
+prod: build up-prod
 
 ## build: run build on dev environment.
 build:
