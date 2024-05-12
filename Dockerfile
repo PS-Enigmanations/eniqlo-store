@@ -21,5 +21,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o main
 # Expose port 8080
 EXPOSE 8080
 
+ENV ENV=production
+
 # Run Executable
 CMD [ "./main_enigmanations" ]
