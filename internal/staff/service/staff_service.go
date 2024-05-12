@@ -38,21 +38,23 @@ func (service *staffService) Login(ctx *gin.Context, req request.StaffLoginReque
 			result <- util.Result[*staff.Staff]{
 				Error: errors.New("invalid phone number"),
 			}
-			staffFound, err := service.repo.FindByPhoneNumber(ctx.Request.Context(), req.PhoneNumber)
-			if err != nil {
-				result <- util.Result[*staff.Staff]{
-					Error: err,
-				}
-				return
-			}
-			if !bcrypt.CheckPasswordHash(req.Password, staffFound.Password) {
-				result <- util.Result[*staff.Staff]{
-					Error: errors.New("invalid password"),
-				}
-			}
+			return
+		}
+		staffFound, err := service.repo.FindByPhoneNumber(ctx.Request.Context(), req.PhoneNumber)
+		if err != nil {
 			result <- util.Result[*staff.Staff]{
-				Result: staffFound,
+				Error: err,
 			}
+			return
+		}
+		if !bcrypt.CheckPasswordHash(req.Password, staffFound.Password) {
+			result <- util.Result[*staff.Staff]{
+				Error: errors.New("invalid password"),
+			}
+			return
+		}
+		result <- util.Result[*staff.Staff]{
+			Result: staffFound,
 		}
 	}()
 	return result

@@ -49,7 +49,7 @@ func (r *staffRepository) FindByPhoneNumber(ctx context.Context, phoneNumber str
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, nil
+			return nil, pgx.ErrNoRows
 		}
 		return nil, err
 	}

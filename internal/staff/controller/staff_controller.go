@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 )
 
 type StaffController interface {
@@ -75,6 +76,10 @@ func (controller *staffController) Login(c *gin.Context) {
 	if staffLoggedIn.Error != nil {
 		if errors.Is(staffLoggedIn.Error, errs.ErrInvalidPhoneNumber) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": staffLoggedIn.Error.Error()})
+			return
+		}
+		if errors.Is(staffLoggedIn.Error, pgx.ErrNoRows) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": staffLoggedIn.Error.Error()})
