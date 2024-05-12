@@ -5,10 +5,11 @@ import (
 	"enigmanations/eniqlo-store/internal/staff/request"
 	"enigmanations/eniqlo-store/internal/staff/response"
 	"enigmanations/eniqlo-store/internal/staff/service"
-	"net/http"
 	"errors"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 )
 
 type StaffController interface {
@@ -33,21 +34,21 @@ func (controller *staffController) Register(c *gin.Context) {
 		return
 	}
 
-	staffCreated, err := controller.Service.Register(c, requestBody)
-	if err != nil {
-		if errors.Is(err, errs.UserExist) {
-			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+	staffCreated := <-controller.Service.Register(c, requestBody)
+	if staffCreated.Error != nil {
+		if errors.Is(staffCreated.Error, errs.UserExist) {
+			c.JSON(http.StatusConflict, gin.H{"error": staffCreated.Error.Error()})
 			return
 		}
-		if err.Error() == "invalid phone number" {
-			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		if errors.Is(staffCreated.Error, errs.ErrInvalidPhoneNumber) {
+			c.JSON(http.StatusConflict, gin.H{"error": staffCreated.Error.Error()})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": staffCreated.Error.Error()})
 		return
 	}
 
-	accessToken, err := controller.Service.GenerateAccessToken(staffCreated)
+	accessToken, err := controller.Service.GenerateAccessToken(staffCreated.Result)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -56,9 +57,9 @@ func (controller *staffController) Register(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "User registered successfully",
 		"data": response.StaffResponse{
-			ID:          staffCreated.ID,
-			Name:        staffCreated.Name,
-			PhoneNumber: staffCreated.PhoneNumber,
+			ID:          staffCreated.Result.ID,
+			Name:        staffCreated.Result.Name,
+			PhoneNumber: staffCreated.Result.PhoneNumber,
 			AccessToken: accessToken,
 		},
 	})
@@ -71,17 +72,21 @@ func (controller *staffController) Login(c *gin.Context) {
 		return
 	}
 
-	staffLoggedIn, err := controller.Service.Login(c, requestBody)
-	if err != nil {
-		if err.Error() == "invalid phone number" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	staffLoggedIn := <-controller.Service.Login(c, requestBody)
+	if staffLoggedIn.Error != nil {
+		if errors.Is(staffLoggedIn.Error, errs.ErrInvalidPhoneNumber) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": staffLoggedIn.Error.Error()})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if errors.Is(staffLoggedIn.Error, pgx.ErrNoRows) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": staffLoggedIn.Error.Error()})
 		return
 	}
 
-	accessToken, err := controller.Service.GenerateAccessToken(staffLoggedIn)
+	accessToken, err := controller.Service.GenerateAccessToken(staffLoggedIn.Result)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -90,9 +95,9 @@ func (controller *staffController) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "User logged in successfully",
 		"data": response.StaffResponse{
-			ID:          staffLoggedIn.ID,
-			Name:        staffLoggedIn.Name,
-			PhoneNumber: staffLoggedIn.PhoneNumber,
+			ID:          staffLoggedIn.Result.ID,
+			Name:        staffLoggedIn.Result.Name,
+			PhoneNumber: staffLoggedIn.Result.PhoneNumber,
 			AccessToken: accessToken,
 		},
 	})
