@@ -117,7 +117,6 @@ docker run -it --rm --network app_network -p 8080:8080 \
 
 # Using env variable exported
 docker run -it --rm --network app_network -p 8080:8080 \
-    -e ENV=production \
     -e DB_HOST=host.docker.internal \
     -e DB_USERNAME=postgres \
     -e DB_PASSWORD=postgres \
