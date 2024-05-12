@@ -63,7 +63,7 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 			return
 		}
 
-		total := 0
+		total := 0.0
 
 		var details []transaction.ProductDetail
 
@@ -113,17 +113,17 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 
 			details = append(details, d)
 
-			total += int(productExists.Price * float64(detail.Quantity))
+			total += float64(productExists.Price * float64(detail.Quantity))
 		}
 
-		if float64(total) > p.Paid {
+		if total > p.Paid {
 			result <- util.ResultErr{
 				Error: errs.PaidIsNotEnough,
 			}
 			return
 		}
 
-		validChange := p.Paid - float64(total)
+		validChange := p.Paid - total
 		if validChange != *p.Change {
 			result <- util.ResultErr{
 				Error: errs.ChangeIsNotRight,
