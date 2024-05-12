@@ -57,6 +57,7 @@ func (service *staffService) Login(ctx *gin.Context, req request.StaffLoginReque
 		result <- util.Result[*staff.Staff]{
 			Result: staffFound,
 		}
+		close(result)
 	}()
 	return result
 }
@@ -114,6 +115,7 @@ func (service *staffService) Register(ctx *gin.Context, req request.StaffRegiste
 		result <- util.Result[*staff.Staff]{
 			Result: staffCreated,
 		}
+		close(result)
 	}()
 
 	return result
