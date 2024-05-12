@@ -46,7 +46,7 @@ type productDetailsBatchRet struct {
 func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.ResultErr {
 	repo := svc.repo
 
-	result := make(chan util.ResultErr)
+	result := make(chan util.ResultErr, 1)
 	go func() {
 		customerFound, err := repo.Customer.FindById(svc.context, p.CustomerId)
 		if customerFound == nil {
@@ -63,7 +63,7 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 			return
 		}
 
-		total := 0.0
+		var total = 0.0
 
 		var details []transaction.ProductDetail
 
@@ -110,10 +110,10 @@ func (svc *transactionService) Create(p *request.CheckoutRequest) <-chan util.Re
 				ProductId: detail.ProductId,
 				Quantity:  detail.Quantity,
 			}
-
 			details = append(details, d)
 
 			total += float64(productExists.Price * float64(detail.Quantity))
+
 		}
 
 		if total > p.Paid {

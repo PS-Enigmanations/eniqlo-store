@@ -64,7 +64,7 @@ docker-compose up --build postgres
 **3. Migrate database**
 
 ```sh
-migrate -path db/migrations -database "postgres://postgres:postgres@0.0.0.0:5430/eniqlo-store?sslmode=disable" up
+docker-compose up --build migrate
 ```
 
 **4. Running API**
@@ -77,16 +77,21 @@ Open http://localhost:8080
 
 ### Publishing Docker images:
 
-**1. Push to the registry**
+**1. Prepare database (if not exists)**
 
 ```sh
-# Migrate database first (if needed)
-# Or if you want to migrate from local
-#
-# Run:
-# 1. docker-compose up --build postgres
-# 2. cat db/init.sql | docker exec -i enigmanations_postgres_container psql -h localhost -p 5432 -U postgres -d eniqlo-store
+docker exec -it enigmanations_postgres_container psql -h host.docker.internal -p 5430 -U postgres -c 'create database "eniqlo-store"'
+```
 
+**2. Run migration**
+
+```sh
+docker-compose up --build migrate
+```
+
+**3. Push to the registry**
+
+```sh
 # The password needs to be requested from the author, @natserract.
 export DOCKER_PASSWORD="" && bash ./docker-deploy.sh
 ```
@@ -107,12 +112,11 @@ docker pull natserract/enigmanations-inventory:latest
 docker network create app_network
 
 # Using env file
-docker run -it --rm --network app_network \
+docker run -it --rm --network app_network -p 8080:8080 \
     --env-file .env natserract/enigmanations-inventory
 
 # Using env variable exported
-docker run -it --rm --network app_network \
-    -e ENV=production \
+docker run -it --rm --network app_network -p 8080:8080 \
     -e DB_HOST=host.docker.internal \
     -e DB_USERNAME=postgres \
     -e DB_PASSWORD=postgres \
