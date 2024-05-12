@@ -12,6 +12,7 @@ import (
 	"enigmanations/eniqlo-store/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
 )
 
@@ -89,7 +90,7 @@ func (service *staffService) Register(ctx *gin.Context, req request.StaffRegiste
 		}
 
 		staffFound, err := service.repo.FindByPhoneNumber(ctx.Request.Context(), req.PhoneNumber)
-		if err != nil {
+		if err != nil && err != pgx.ErrNoRows {
 			result <- util.Result[*staff.Staff]{
 				Error: err,
 			}

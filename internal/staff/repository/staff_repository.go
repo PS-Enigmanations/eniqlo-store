@@ -5,7 +5,6 @@ import (
 	"enigmanations/eniqlo-store/internal/staff"
 	"log"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -48,9 +47,6 @@ func (r *staffRepository) FindByPhoneNumber(ctx context.Context, phoneNumber str
 		&staff.Password,
 	)
 	if err != nil {
-		if err == pgx.ErrNoRows {
-			return nil, pgx.ErrNoRows
-		}
 		return nil, err
 	}
 	return staff, nil
