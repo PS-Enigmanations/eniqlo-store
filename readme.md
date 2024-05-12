@@ -112,7 +112,7 @@ docker pull natserract/enigmanations-inventory:latest
 docker network create app_network
 
 # Using env file
-docker run -it --rm --network app_network \
+docker run -it --rm --network app_network -p 8080:8080 \
     --env-file .env natserract/enigmanations-inventory
 
 # Using env variable exported
